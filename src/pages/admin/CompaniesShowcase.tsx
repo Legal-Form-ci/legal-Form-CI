@@ -48,7 +48,7 @@ const CompaniesShowcase = () => {
   useEffect(() => { fetchCompanies(); }, []);
 
   const fetchCompanies = async () => {
-    const { data } = await supabase.from("created_companies").select("*").order("created_at", { ascending: false });
+    const { data } = await (supabase as any).from("created_companies").select("*").order("created_at", { ascending: false });
     if (data) setCompanies(data as CreatedCompany[]);
     setLoading(false);
   };
