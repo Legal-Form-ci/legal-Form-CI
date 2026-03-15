@@ -84,12 +84,12 @@ const CompaniesShowcase = () => {
     if (!formData.company_name.trim()) {
       toast({ title: "Nom requis", variant: "destructive" }); return;
     }
-    const payload = { ...formData, is_visible: true, testimonial_status: "approved" as const };
+    const payload = { ...formData, is_published: true } as any;
     if (editingCompany) {
-      await supabase.from("created_companies").update(payload).eq("id", editingCompany.id);
+      await (supabase as any).from("created_companies").update(payload).eq("id", editingCompany.id);
       toast({ title: "Entreprise mise à jour" });
     } else {
-      await supabase.from("created_companies").insert(payload);
+      await (supabase as any).from("created_companies").insert(payload);
       toast({ title: "Entreprise ajoutée" });
     }
     setDialogOpen(false);
