@@ -81,7 +81,7 @@ const CompanyDetail = () => {
         .single();
 
       if (error) throw error;
-      setRequest(data);
+      setRequest(data as any);
     } catch (error) {
       console.error('Error fetching request:', error);
       toast({
