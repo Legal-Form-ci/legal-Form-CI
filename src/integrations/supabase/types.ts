@@ -59,6 +59,7 @@ export type Database = {
           title: string
           updated_at: string
           views: number | null
+          views_count: number | null
         }
         Insert: {
           author_id?: string | null
@@ -77,6 +78,7 @@ export type Database = {
           title: string
           updated_at?: string
           views?: number | null
+          views_count?: number | null
         }
         Update: {
           author_id?: string | null
@@ -95,6 +97,7 @@ export type Database = {
           title?: string
           updated_at?: string
           views?: number | null
+          views_count?: number | null
         }
         Relationships: []
       }
@@ -140,6 +143,53 @@ export type Database = {
         }
         Relationships: []
       }
+      company_associates: {
+        Row: {
+          company_request_id: string
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          marital_regime: string | null
+          marital_status: string | null
+          phone: string | null
+          profession: string | null
+          residence_address: string | null
+        }
+        Insert: {
+          company_request_id: string
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          marital_regime?: string | null
+          marital_status?: string | null
+          phone?: string | null
+          profession?: string | null
+          residence_address?: string | null
+        }
+        Update: {
+          company_request_id?: string
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          marital_regime?: string | null
+          marital_status?: string | null
+          phone?: string | null
+          profession?: string | null
+          residence_address?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_associates_company_request_id_fkey"
+            columns: ["company_request_id"]
+            isOneToOne: false
+            referencedRelation: "company_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_requests: {
         Row: {
           activity: string | null
@@ -153,6 +203,7 @@ export type Database = {
           company_type: string
           created_at: string
           documents: Json | null
+          estimated_price: number | null
           id: string
           manager_email: string | null
           manager_name: string | null
@@ -162,6 +213,7 @@ export type Database = {
           payment_reference: string | null
           payment_status: string | null
           referral_code: string | null
+          referrer_code: string | null
           region: string | null
           status: string
           tracking_number: string | null
@@ -180,6 +232,7 @@ export type Database = {
           company_type?: string
           created_at?: string
           documents?: Json | null
+          estimated_price?: number | null
           id?: string
           manager_email?: string | null
           manager_name?: string | null
@@ -189,6 +242,7 @@ export type Database = {
           payment_reference?: string | null
           payment_status?: string | null
           referral_code?: string | null
+          referrer_code?: string | null
           region?: string | null
           status?: string
           tracking_number?: string | null
@@ -207,6 +261,7 @@ export type Database = {
           company_type?: string
           created_at?: string
           documents?: Json | null
+          estimated_price?: number | null
           id?: string
           manager_email?: string | null
           manager_name?: string | null
@@ -216,6 +271,7 @@ export type Database = {
           payment_reference?: string | null
           payment_status?: string | null
           referral_code?: string | null
+          referrer_code?: string | null
           region?: string | null
           status?: string
           tracking_number?: string | null
@@ -260,6 +316,38 @@ export type Database = {
         }
         Relationships: []
       }
+      ebook_downloads: {
+        Row: {
+          created_at: string
+          ebook_id: string
+          id: string
+          user_email: string
+          user_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          ebook_id: string
+          id?: string
+          user_email: string
+          user_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          ebook_id?: string
+          id?: string
+          user_email?: string
+          user_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ebook_downloads_ebook_id_fkey"
+            columns: ["ebook_id"]
+            isOneToOne: false
+            referencedRelation: "ebooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ebooks: {
         Row: {
           category: string | null
@@ -269,7 +357,9 @@ export type Database = {
           download_count: number | null
           file_url: string | null
           id: string
+          is_free: boolean | null
           is_published: boolean | null
+          price: number | null
           slug: string
           title: string
         }
@@ -281,7 +371,9 @@ export type Database = {
           download_count?: number | null
           file_url?: string | null
           id?: string
+          is_free?: boolean | null
           is_published?: boolean | null
+          price?: number | null
           slug: string
           title: string
         }
@@ -293,7 +385,9 @@ export type Database = {
           download_count?: number | null
           file_url?: string | null
           id?: string
+          is_free?: boolean | null
           is_published?: boolean | null
+          price?: number | null
           slug?: string
           title?: string
         }
@@ -355,6 +449,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "forum_replies_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "forum_posts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "forum_replies_topic_id_fkey"
             columns: ["topic_id"]
@@ -631,6 +732,9 @@ export type Database = {
           phone: string | null
           referral_balance: number | null
           referral_code: string | null
+          referral_count: number | null
+          referral_earnings: number | null
+          referral_link: string | null
           referred_by: string | null
           updated_at: string
           user_id: string
@@ -644,6 +748,9 @@ export type Database = {
           phone?: string | null
           referral_balance?: number | null
           referral_code?: string | null
+          referral_count?: number | null
+          referral_earnings?: number | null
+          referral_link?: string | null
           referred_by?: string | null
           updated_at?: string
           user_id: string
@@ -657,6 +764,9 @@ export type Database = {
           phone?: string | null
           referral_balance?: number | null
           referral_code?: string | null
+          referral_count?: number | null
+          referral_earnings?: number | null
+          referral_link?: string | null
           referred_by?: string | null
           updated_at?: string
           user_id?: string
@@ -669,9 +779,12 @@ export type Database = {
           created_at: string
           id: string
           method: string | null
+          payment_details: Json | null
+          payment_method: string | null
           phone: string | null
           processed_at: string | null
           processed_by: string | null
+          requested_at: string | null
           status: string | null
           user_id: string
         }
@@ -680,9 +793,12 @@ export type Database = {
           created_at?: string
           id?: string
           method?: string | null
+          payment_details?: Json | null
+          payment_method?: string | null
           phone?: string | null
           processed_at?: string | null
           processed_by?: string | null
+          requested_at?: string | null
           status?: string | null
           user_id: string
         }
@@ -691,9 +807,12 @@ export type Database = {
           created_at?: string
           id?: string
           method?: string | null
+          payment_details?: Json | null
+          payment_method?: string | null
           phone?: string | null
           processed_at?: string | null
           processed_by?: string | null
+          requested_at?: string | null
           status?: string | null
           user_id?: string
         }
@@ -703,40 +822,58 @@ export type Database = {
         Row: {
           created_at: string
           direction: string | null
+          document_name: string | null
+          document_type: string | null
+          document_url: string | null
           file_name: string
           file_size: number | null
           file_type: string | null
           file_url: string
           id: string
+          message: string | null
           notes: string | null
           request_id: string
           request_type: string
+          sender_id: string | null
+          sender_role: string | null
           uploaded_by: string | null
         }
         Insert: {
           created_at?: string
           direction?: string | null
+          document_name?: string | null
+          document_type?: string | null
+          document_url?: string | null
           file_name: string
           file_size?: number | null
           file_type?: string | null
           file_url: string
           id?: string
+          message?: string | null
           notes?: string | null
           request_id: string
           request_type?: string
+          sender_id?: string | null
+          sender_role?: string | null
           uploaded_by?: string | null
         }
         Update: {
           created_at?: string
           direction?: string | null
+          document_name?: string | null
+          document_type?: string | null
+          document_url?: string | null
           file_name?: string
           file_size?: number | null
           file_type?: string | null
           file_url?: string
           id?: string
+          message?: string | null
           notes?: string | null
           request_id?: string
           request_type?: string
+          sender_id?: string | null
+          sender_role?: string | null
           uploaded_by?: string | null
         }
         Relationships: []
@@ -956,36 +1093,48 @@ export type Database = {
       }
       testimonials: {
         Row: {
+          avatar_url: string | null
           comment: string
           company: string | null
+          company_type: string | null
           created_at: string
           id: string
           is_approved: boolean | null
+          location: string | null
           logo: string | null
+          message: string | null
           name: string
           rating: number
           region: string | null
           user_id: string | null
         }
         Insert: {
+          avatar_url?: string | null
           comment: string
           company?: string | null
+          company_type?: string | null
           created_at?: string
           id?: string
           is_approved?: boolean | null
+          location?: string | null
           logo?: string | null
+          message?: string | null
           name: string
           rating?: number
           region?: string | null
           user_id?: string | null
         }
         Update: {
+          avatar_url?: string | null
           comment?: string
           company?: string | null
+          company_type?: string | null
           created_at?: string
           id?: string
           is_approved?: boolean | null
+          location?: string | null
           logo?: string | null
+          message?: string | null
           name?: string
           rating?: number
           region?: string | null
@@ -1016,7 +1165,87 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      forum_comments: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          id: string | null
+          likes_count: number | null
+          post_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          likes_count?: never
+          post_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          likes_count?: never
+          post_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_replies_topic_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "forum_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forum_replies_topic_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "forum_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forum_posts: {
+        Row: {
+          category: string | null
+          content: string | null
+          created_at: string | null
+          id: string | null
+          is_pinned: boolean | null
+          likes_count: number | null
+          title: string | null
+          updated_at: string | null
+          user_id: string | null
+          views_count: number | null
+        }
+        Insert: {
+          category?: string | null
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_pinned?: boolean | null
+          likes_count?: never
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          views_count?: number | null
+        }
+        Update: {
+          category?: string | null
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_pinned?: boolean | null
+          likes_count?: never
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          views_count?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
@@ -1026,6 +1255,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_blog_views: { Args: { post_id: string }; Returns: undefined }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
