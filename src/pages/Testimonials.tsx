@@ -36,11 +36,11 @@ const Testimonials = () => {
     try {
       // Fetch from both tables
       const [companiesRes, testimonialsRes] = await Promise.all([
-        supabase.from('created_companies' as any).select('id, name, type, region, rating, testimonial, founder_name, founder_photo_url, logo_url').eq('is_published', true).not('testimonial', 'is', null).order('created_at', { ascending: false }),
+        (supabase as any).from('created_companies').select('id, name, type, region, rating, testimonial, founder_name, founder_photo_url, logo_url').eq('is_published', true).not('testimonial', 'is', null).order('created_at', { ascending: false }),
         supabase.from('testimonials').select('*').eq('is_approved', true).order('created_at', { ascending: false })
       ]);
 
-      const fromCompanies = (companiesRes.data || []).map(item => ({
+      const fromCompanies = ((companiesRes.data || []) as any[]).map((item: any) => ({
         id: item.id,
         name: item.founder_name || "Client",
         company: item.name || "",
