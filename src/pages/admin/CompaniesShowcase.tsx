@@ -97,7 +97,7 @@ const CompaniesShowcase = () => {
   };
 
   const toggleVisibility = async (id: string, visible: boolean) => {
-    await supabase.from("created_companies").update({ is_visible: !visible }).eq("id", id);
+    await (supabase as any).from("created_companies").update({ is_published: !visible }).eq("id", id);
     setCompanies(prev => prev.map(c => c.id === id ? { ...c, is_visible: !visible } : c));
   };
 
