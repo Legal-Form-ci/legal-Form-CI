@@ -99,7 +99,7 @@ const LexIAConversations = () => {
       const { data, error } = await query;
 
       if (error) throw error;
-      setConversations(data || []);
+      setConversations((data as any) || []);
     } catch (error) {
       console.error('Error fetching conversations:', error);
     } finally {
