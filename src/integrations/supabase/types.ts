@@ -201,8 +201,10 @@ export type Database = {
           client_review: string | null
           company_name: string
           company_type: string
+          contact_name: string | null
           created_at: string
           documents: Json | null
+          email: string | null
           estimated_price: number | null
           id: string
           manager_email: string | null
@@ -212,10 +214,12 @@ export type Database = {
           payment_amount: number | null
           payment_reference: string | null
           payment_status: string | null
+          phone: string | null
           referral_code: string | null
           referrer_code: string | null
           region: string | null
           status: string
+          structure_type: string | null
           tracking_number: string | null
           updated_at: string
           user_id: string | null
@@ -230,8 +234,10 @@ export type Database = {
           client_review?: string | null
           company_name: string
           company_type?: string
+          contact_name?: string | null
           created_at?: string
           documents?: Json | null
+          email?: string | null
           estimated_price?: number | null
           id?: string
           manager_email?: string | null
@@ -241,10 +247,12 @@ export type Database = {
           payment_amount?: number | null
           payment_reference?: string | null
           payment_status?: string | null
+          phone?: string | null
           referral_code?: string | null
           referrer_code?: string | null
           region?: string | null
           status?: string
+          structure_type?: string | null
           tracking_number?: string | null
           updated_at?: string
           user_id?: string | null
@@ -259,8 +267,10 @@ export type Database = {
           client_review?: string | null
           company_name?: string
           company_type?: string
+          contact_name?: string | null
           created_at?: string
           documents?: Json | null
+          email?: string | null
           estimated_price?: number | null
           id?: string
           manager_email?: string | null
@@ -270,10 +280,12 @@ export type Database = {
           payment_amount?: number | null
           payment_reference?: string | null
           payment_status?: string | null
+          phone?: string | null
           referral_code?: string | null
           referrer_code?: string | null
           region?: string | null
           status?: string
+          structure_type?: string | null
           tracking_number?: string | null
           updated_at?: string
           user_id?: string | null
@@ -313,6 +325,51 @@ export type Database = {
           phone?: string | null
           replied?: boolean | null
           subject?: string | null
+        }
+        Relationships: []
+      }
+      created_companies: {
+        Row: {
+          created_at: string
+          district: string | null
+          founder_name: string | null
+          founder_photo_url: string | null
+          id: string
+          is_published: boolean | null
+          logo_url: string | null
+          name: string
+          rating: number | null
+          region: string | null
+          testimonial: string | null
+          type: string | null
+        }
+        Insert: {
+          created_at?: string
+          district?: string | null
+          founder_name?: string | null
+          founder_photo_url?: string | null
+          id?: string
+          is_published?: boolean | null
+          logo_url?: string | null
+          name: string
+          rating?: number | null
+          region?: string | null
+          testimonial?: string | null
+          type?: string | null
+        }
+        Update: {
+          created_at?: string
+          district?: string | null
+          founder_name?: string | null
+          founder_photo_url?: string | null
+          id?: string
+          is_published?: boolean | null
+          logo_url?: string | null
+          name?: string
+          rating?: number | null
+          region?: string | null
+          testimonial?: string | null
+          type?: string | null
         }
         Relationships: []
       }
@@ -946,8 +1003,12 @@ export type Database = {
           assigned_to: string | null
           client_rating: number | null
           client_review: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
           created_at: string
           details: Json | null
+          estimated_price: number | null
           id: string
           notes: string | null
           payment_amount: number | null
@@ -964,8 +1025,12 @@ export type Database = {
           assigned_to?: string | null
           client_rating?: number | null
           client_review?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
           created_at?: string
           details?: Json | null
+          estimated_price?: number | null
           id?: string
           notes?: string | null
           payment_amount?: number | null
@@ -982,8 +1047,12 @@ export type Database = {
           assigned_to?: string | null
           client_rating?: number | null
           client_review?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
           created_at?: string
           details?: Json | null
+          estimated_price?: number | null
           id?: string
           notes?: string | null
           payment_amount?: number | null
