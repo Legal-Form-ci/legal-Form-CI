@@ -97,14 +97,14 @@ const IdentityDocuments = () => {
         })
       );
 
-      setDocuments(docsWithUsers);
+      setDocuments(docsWithUsers as any);
 
       // Calculate stats
       const total = docsWithUsers.length;
-      const pending = docsWithUsers.filter(d => !d.verified && !d.verified_at).length;
-      const verified = docsWithUsers.filter(d => d.verified).length;
-      const rejected = docsWithUsers.filter(d => !d.verified && d.verified_at).length;
-      const faceDetected = docsWithUsers.filter(d => d.face_detected).length;
+      const pending = docsWithUsers.filter(d => d.status === 'pending').length;
+      const verified = docsWithUsers.filter(d => d.status === 'verified').length;
+      const rejected = docsWithUsers.filter(d => d.status === 'rejected').length;
+      const faceDetected = 0;
       
       setStats({ total, pending, verified, rejected, faceDetected });
     } catch (error: any) {

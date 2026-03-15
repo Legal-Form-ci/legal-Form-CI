@@ -102,7 +102,7 @@ const CompaniesShowcase = () => {
   };
 
   const deleteCompany = async (id: string) => {
-    await supabase.from("created_companies").delete().eq("id", id);
+    await (supabase as any).from("created_companies").delete().eq("id", id);
     setCompanies(prev => prev.filter(c => c.id !== id));
     toast({ title: "Entreprise supprimée" });
   };

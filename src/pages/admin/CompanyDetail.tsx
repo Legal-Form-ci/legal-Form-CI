@@ -102,7 +102,7 @@ const CompanyDetail = () => {
         .eq('company_request_id', id);
 
       if (error) throw error;
-      setAssociates(data || []);
+      setAssociates((data as any) || []);
     } catch (error) {
       console.error('Error fetching associates:', error);
     }
