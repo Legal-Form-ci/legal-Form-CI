@@ -53,15 +53,15 @@ const ClientMessages = () => {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
-    const { data: services } = await supabase
+    const { data: services } = await (supabase as any)
       .from("service_requests")
-      .select("id, company_name, status, service_type")
+      .select("id, service_type, status")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
     const reqs: RequestInfo[] = [
-      ...(companies || []).map((c) => ({ id: c.id, type: "company" as const, name: c.company_name || "Entreprise", status: c.status })),
-      ...(services || []).map((s) => ({ id: s.id, type: "service" as const, name: s.company_name || s.service_type || "Service", status: s.status })),
+      ...(companies || []).map((c: any) => ({ id: c.id, type: "company" as const, name: c.company_name || "Entreprise", status: c.status })),
+      ...((services || []) as any[]).map((s: any) => ({ id: s.id, type: "service" as const, name: s.service_type || "Service", status: s.status })),
     ];
     setRequests(reqs);
 

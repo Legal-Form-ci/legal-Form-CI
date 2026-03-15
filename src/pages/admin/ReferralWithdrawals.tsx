@@ -92,7 +92,7 @@ const ReferralWithdrawals = () => {
         })
       );
 
-      setWithdrawals(withdrawalsWithProfiles);
+      setWithdrawals(withdrawalsWithProfiles as any);
     } catch (error: any) {
       toast({
         title: "Erreur",

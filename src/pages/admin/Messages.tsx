@@ -93,15 +93,15 @@ const AdminMessages = () => {
             companyName = data.company_name || "";
           }
         } else {
-          const { data } = await supabase
+          const { data } = await (supabase as any)
             .from("service_requests")
-            .select("contact_name, contact_email, company_name")
+            .select("contact_name, contact_email, service_type")
             .eq("id", conv.request_id)
             .maybeSingle();
           if (data) {
-            clientName = data.contact_name || "Client";
-            clientEmail = data.contact_email || "";
-            companyName = data.company_name || "";
+            clientName = (data as any).contact_name || "Client";
+            clientEmail = (data as any).contact_email || "";
+            companyName = (data as any).service_type || "";
           }
         }
 

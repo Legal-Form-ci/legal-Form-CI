@@ -71,7 +71,7 @@ const AdditionalServicesAdmin = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setRequests(data || []);
+      setRequests((data as any) || []);
     } catch (error: any) {
       toast({
         title: "Erreur",

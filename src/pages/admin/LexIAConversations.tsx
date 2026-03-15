@@ -99,7 +99,7 @@ const LexIAConversations = () => {
       const { data, error } = await query;
 
       if (error) throw error;
-      setConversations(data || []);
+      setConversations((data as any) || []);
     } catch (error) {
       console.error('Error fetching conversations:', error);
     } finally {
@@ -131,15 +131,8 @@ const LexIAConversations = () => {
         .select('*', { count: 'exact', head: true })
         .gte('created_at', subDays(new Date(), 7).toISOString());
 
-      // Average satisfaction
-      const { data: satisfactionData } = await supabase
-        .from('lexia_conversations')
-        .select('satisfaction_rating')
-        .not('satisfaction_rating', 'is', null);
-
-      const avgSatisfaction = satisfactionData && satisfactionData.length > 0
-        ? satisfactionData.reduce((acc, curr) => acc + (curr.satisfaction_rating || 0), 0) / satisfactionData.length
-        : 0;
+      // Average satisfaction (not available in current schema)
+      const avgSatisfaction = 0;
 
       setStats({
         totalConversations: totalConversations || 0,

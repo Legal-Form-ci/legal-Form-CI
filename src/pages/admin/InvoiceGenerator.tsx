@@ -91,10 +91,10 @@ const InvoiceGenerator = () => {
             estimated_price: c.estimated_price || 0,
             payment_status: c.payment_status,
           })),
-          ...(serviceData || []).map(s => ({
+          ...(serviceData || []).map((s: any) => ({
             id: s.id,
             tracking_number: s.tracking_number || '',
-            company_name: s.company_name || s.service_type,
+            company_name: s.service_type,
             contact_name: s.contact_name || '',
             email: s.contact_email || '',
             phone: s.contact_phone || '',

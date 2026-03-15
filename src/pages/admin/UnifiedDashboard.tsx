@@ -86,7 +86,7 @@ const UnifiedDashboard = () => {
       .order('created_at', { ascending: false });
 
     if (!error && data) {
-      setServiceRequests(data);
+      setServiceRequests((data as any) || []);
     }
   };
 

@@ -31,9 +31,9 @@ const Showcase = () => {
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const { data, error } = await supabase.from('created_companies').select('name, type, region, district, created_at, rating, testimonial, founder_name, logo_url').eq('is_visible', true).order('created_at', { ascending: false });
+        const { data, error } = await (supabase as any).from('created_companies').select('name, type, region, district, created_at, rating, testimonial, founder_name, logo_url').eq('is_published', true).order('created_at', { ascending: false });
         if (!error && data) {
-          const mapped = data.map(item => ({ 
+          const mapped = (data as any[]).map((item: any) => ({ 
             name: item.name, 
             type: item.type, 
             region: item.region, 

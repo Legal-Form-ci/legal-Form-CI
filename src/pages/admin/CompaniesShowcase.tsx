@@ -48,7 +48,7 @@ const CompaniesShowcase = () => {
   useEffect(() => { fetchCompanies(); }, []);
 
   const fetchCompanies = async () => {
-    const { data } = await supabase.from("created_companies").select("*").order("created_at", { ascending: false });
+    const { data } = await (supabase as any).from("created_companies").select("*").order("created_at", { ascending: false });
     if (data) setCompanies(data as CreatedCompany[]);
     setLoading(false);
   };
@@ -84,12 +84,12 @@ const CompaniesShowcase = () => {
     if (!formData.company_name.trim()) {
       toast({ title: "Nom requis", variant: "destructive" }); return;
     }
-    const payload = { ...formData, is_visible: true, testimonial_status: "approved" as const };
+    const payload = { ...formData, is_published: true } as any;
     if (editingCompany) {
-      await supabase.from("created_companies").update(payload).eq("id", editingCompany.id);
+      await (supabase as any).from("created_companies").update(payload).eq("id", editingCompany.id);
       toast({ title: "Entreprise mise à jour" });
     } else {
-      await supabase.from("created_companies").insert(payload);
+      await (supabase as any).from("created_companies").insert(payload);
       toast({ title: "Entreprise ajoutée" });
     }
     setDialogOpen(false);
@@ -97,12 +97,12 @@ const CompaniesShowcase = () => {
   };
 
   const toggleVisibility = async (id: string, visible: boolean) => {
-    await supabase.from("created_companies").update({ is_visible: !visible }).eq("id", id);
+    await (supabase as any).from("created_companies").update({ is_published: !visible }).eq("id", id);
     setCompanies(prev => prev.map(c => c.id === id ? { ...c, is_visible: !visible } : c));
   };
 
   const deleteCompany = async (id: string) => {
-    await supabase.from("created_companies").delete().eq("id", id);
+    await (supabase as any).from("created_companies").delete().eq("id", id);
     setCompanies(prev => prev.filter(c => c.id !== id));
     toast({ title: "Entreprise supprimée" });
   };

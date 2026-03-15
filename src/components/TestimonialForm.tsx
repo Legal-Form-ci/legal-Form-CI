@@ -149,14 +149,13 @@ const TestimonialForm = ({ onSuccess }: TestimonialFormProps) => {
         .from('testimonials')
         .insert({
           name: formData.founderName,
-          message: formData.testimonial,
+          comment: formData.testimonial,
           company: formData.companyName,
-          company_type: formData.companyType.toUpperCase(),
-          location: formData.region,
+          region: formData.region,
           rating: parseInt(formData.rating),
-          avatar_url: photoUrl,
+          logo: logoUrl,
           is_approved: false,
-        });
+        } as any);
 
       if (error) throw error;
 

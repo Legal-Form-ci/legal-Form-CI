@@ -69,7 +69,7 @@ const CompaniesManagement = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setRequests(data || []);
+      setRequests((data as any) || []);
     } catch (error) {
       console.error('Error fetching requests:', error);
       toast({

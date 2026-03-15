@@ -83,7 +83,7 @@ const ClientDashboard = () => {
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
 
-      setRequests(allRequests);
+      setRequests(allRequests as any);
     } catch (error: any) {
       console.error('Error fetching requests:', error);
       toast({
