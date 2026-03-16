@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import NewsSection from "@/components/NewsSection";
 import heroBackground from "@/assets/hero-bg.jpg";
 import { supabase } from "@/integrations/supabase/client";
+import { HeroSearchBar } from "@/components/HeroSearchBar";
 
 interface HomeTestimonial {
   name: string;
