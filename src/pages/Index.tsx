@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Building2, FileText, Shield, CheckCircle2, Star, GraduationCap, Gift, Zap, Clock, HeadphonesIcon } from "lucide-react";
+import { ArrowRight, Building2, FileText, Shield, CheckCircle2, Star, GraduationCap, Gift, Zap, Clock, HeadphonesIcon, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/Header";
