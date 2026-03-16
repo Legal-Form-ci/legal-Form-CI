@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Building2, FileText, Shield, CheckCircle2, Star, GraduationCap, Gift, Zap, Clock, HeadphonesIcon } from "lucide-react";
+import { ArrowRight, Building2, FileText, Shield, CheckCircle2, Star, GraduationCap, Gift, Zap, Clock, HeadphonesIcon, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/Header";
@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import NewsSection from "@/components/NewsSection";
 import heroBackground from "@/assets/hero-bg.jpg";
 import { supabase } from "@/integrations/supabase/client";
+import { HeroSearchBar } from "@/components/HeroSearchBar";
 
 interface HomeTestimonial {
   name: string;
@@ -205,6 +206,9 @@ const Index = () => {
                 </div>
               </div>
               
+              {/* AI Search Bar */}
+              <HeroSearchBar />
+
               <div className="flex flex-col sm:flex-row gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
                 <Link to="/create">
                   <Button size="lg" className="bg-accent hover:bg-accent/90 text-white shadow-strong text-lg px-8 py-6 h-auto font-semibold group">
