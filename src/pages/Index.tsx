@@ -206,6 +206,9 @@ const Index = () => {
                 </div>
               </div>
               
+              {/* AI Search Bar */}
+              <HeroSearchBar />
+
               <div className="flex flex-col sm:flex-row gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
                 <Link to="/create">
                   <Button size="lg" className="bg-accent hover:bg-accent/90 text-white shadow-strong text-lg px-8 py-6 h-auto font-semibold group">

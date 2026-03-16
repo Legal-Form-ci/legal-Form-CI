@@ -160,6 +160,8 @@ const App = () => (
           <Route path="/admin/showcase" element={<CompaniesShowcase />} />
           <Route path="/client/messages" element={<ClientMessages />} />
           <Route path="/mes-messages" element={<ClientMessages />} />
+          <Route path="/search-results" element={<SearchResults />} />
+          <Route path="/resultats-recherche" element={<SearchResults />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />
