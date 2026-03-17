@@ -47,3 +47,6 @@ verify_jwt = false
 
 [functions.delete-admin-user]
 verify_jwt = false
+
+[functions.translate-content]
+verify_jwt = false

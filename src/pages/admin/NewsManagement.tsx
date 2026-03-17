@@ -17,6 +17,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AIContentGenerator from "@/components/AIContentGenerator";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import { 
   Plus, 
   Edit2, 
@@ -630,17 +631,26 @@ const NewsManagement = () => {
                       <div className="border rounded-md p-4 min-h-[400px] max-h-[500px] overflow-y-auto prose prose-sm max-w-none dark:prose-invert">
                         {formData.content ? (
                           <ReactMarkdown
+                            rehypePlugins={[rehypeRaw]}
                             components={{
                               h1: ({children}) => <h1 className="text-3xl font-bold text-primary mb-4 mt-6">{children}</h1>,
-                              h2: ({children}) => <h2 className="text-2xl font-semibold text-foreground mb-3 mt-5">{children}</h2>,
+                              h2: ({children}) => <h2 className="text-2xl font-semibold text-foreground mb-3 mt-5 pb-2 border-b border-border">{children}</h2>,
                               h3: ({children}) => <h3 className="text-xl font-medium text-foreground mb-2 mt-4">{children}</h3>,
-                              p: ({children}) => <p className="mb-4 leading-relaxed">{children}</p>,
+                              p: ({children}) => <p className="mb-4 leading-relaxed text-foreground/90">{children}</p>,
                               ul: ({children}) => <ul className="list-disc list-inside mb-4 space-y-1">{children}</ul>,
                               ol: ({children}) => <ol className="list-decimal list-inside mb-4 space-y-1">{children}</ol>,
-                              blockquote: ({children}) => <blockquote className="border-l-4 border-primary pl-4 italic my-4 bg-muted/50 py-2">{children}</blockquote>,
-                              table: ({children}) => <table className="w-full border-collapse border my-4">{children}</table>,
-                              th: ({children}) => <th className="border p-2 bg-muted font-semibold text-left">{children}</th>,
-                              td: ({children}) => <td className="border p-2">{children}</td>,
+                              blockquote: ({children}) => <blockquote className="border-l-4 border-primary pl-4 italic my-4 bg-muted/50 py-2 rounded-r">{children}</blockquote>,
+                              table: ({children}) => <div className="overflow-x-auto my-6 rounded-lg border border-border"><table className="w-full border-collapse">{children}</table></div>,
+                              thead: ({children}) => <thead className="bg-primary text-primary-foreground">{children}</thead>,
+                              th: ({children}) => <th className="px-4 py-3 text-left text-sm font-bold">{children}</th>,
+                              td: ({children}) => <td className="px-4 py-3 border-t border-border text-sm">{children}</td>,
+                              tr: ({children, ...props}) => {
+                                const node = props.node as any;
+                                const parent = node?.parentNode;
+                                const isBody = parent?.tagName === 'tbody';
+                                const idx = isBody ? Array.from(parent?.children || []).indexOf(node) : -1;
+                                return <tr className={isBody && idx % 2 === 1 ? 'bg-muted/50' : ''}>{children}</tr>;
+                              },
                               code: ({children, className}) => className ? (
                                 <pre className="bg-muted p-3 rounded-md overflow-x-auto my-4"><code className="text-sm">{children}</code></pre>
                               ) : (
@@ -648,7 +658,7 @@ const NewsManagement = () => {
                               ),
                               hr: () => <hr className="my-6 border-t-2 border-muted" />,
                               a: ({href, children}) => <a href={href} className="text-primary underline hover:text-primary/80" target="_blank" rel="noopener noreferrer">{children}</a>,
-                              img: ({src, alt}) => <img src={src} alt={alt || ''} className="max-w-full h-auto rounded-lg my-4" />,
+                              img: ({src, alt}) => <img src={src} alt={alt || ''} className="max-w-full h-auto rounded-lg my-4 shadow-sm" />,
                             }}
                           >
                             {formData.content}
@@ -732,13 +742,13 @@ const NewsManagement = () => {
           <Card>
             <CardContent className="p-4">
               <p className="text-muted-foreground text-sm">Publiés</p>
-              <p className="text-2xl font-bold text-green-500">{posts.filter(p => p.is_published).length}</p>
+              <p className="text-2xl font-bold text-primary">{posts.filter(p => p.is_published).length}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
               <p className="text-muted-foreground text-sm">Brouillons</p>
-              <p className="text-2xl font-bold text-yellow-500">{posts.filter(p => !p.is_published).length}</p>
+              <p className="text-2xl font-bold text-accent">{posts.filter(p => !p.is_published).length}</p>
             </CardContent>
           </Card>
           <Card>
@@ -828,7 +838,7 @@ const NewsManagement = () => {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={post.is_published ? "default" : "secondary"} className={post.is_published ? "bg-green-500" : "bg-yellow-500"}>
+                        <Badge variant={post.is_published ? "default" : "secondary"} className={post.is_published ? "bg-primary" : "bg-accent text-accent-foreground"}>
                           {post.is_published ? "Publié" : "Brouillon"}
                         </Badge>
                       </TableCell>
@@ -839,15 +849,15 @@ const NewsManagement = () => {
                       <TableCell>
                         <div className="flex gap-2">
                           <Button size="icon" variant="ghost" onClick={() => handleEdit(post)}>
-                            <Edit2 className="h-4 w-4 text-blue-400" />
+                            <Edit2 className="h-4 w-4 text-primary" />
                           </Button>
                           <Button size="icon" variant="ghost" asChild>
                             <a href={`/blog/${post.slug}`} target="_blank" rel="noopener noreferrer">
-                              <Eye className="h-4 w-4 text-green-400" />
+                              <Eye className="h-4 w-4 text-primary" />
                             </a>
                           </Button>
                           <Button size="icon" variant="ghost" onClick={() => handleDelete(post.id)}>
-                            <Trash2 className="h-4 w-4 text-red-400" />
+                            <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>
                       </TableCell>
