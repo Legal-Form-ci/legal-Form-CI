@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Building2, FileText, Shield, CheckCircle2, Star, GraduationCap, Gift, Zap, Clock, HeadphonesIcon, Search } from "lucide-react";
+import { ArrowRight, Building2, FileText, Shield, CheckCircle2, Star, GraduationCap, Gift, Zap, Clock, HeadphonesIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/Header";
@@ -71,58 +71,21 @@ const Index = () => {
   ];
 
   const steps = [
-    { 
-      number: "01", 
-      title: t('home.steps.step1.title', 'Choisissez votre service'), 
-      description: t('home.steps.step1.desc', 'Sélectionnez la forme juridique adaptée à votre activité') 
-    },
-    { 
-      number: "02", 
-      title: t('home.steps.step2.title', 'Remplissez le formulaire'), 
-      description: t('home.steps.step2.desc', 'Informations simples et rapides en quelques minutes') 
-    },
-    { 
-      number: "03", 
-      title: t('home.steps.step3.title', 'Recevez votre devis personnalisé'), 
-      description: t('home.steps.step3.desc', 'Un devis adapté à votre situation vous est transmis') 
-    },
-    { 
-      number: "04", 
-      title: t('home.steps.step4.title', 'Suivi jusqu\'à tous vos documents'), 
-      description: t('home.steps.step4.desc', 'Suivi personnalisé en temps réel') 
-    },
+    { number: "01", title: t('home.steps.step1.title', 'Choisissez votre service'), description: t('home.steps.step1.desc', 'Sélectionnez la forme juridique adaptée à votre activité') },
+    { number: "02", title: t('home.steps.step2.title', 'Remplissez le formulaire'), description: t('home.steps.step2.desc', 'Informations simples et rapides en quelques minutes') },
+    { number: "03", title: t('home.steps.step3.title', 'Recevez votre devis personnalisé'), description: t('home.steps.step3.desc', 'Un devis adapté à votre situation vous est transmis') },
+    { number: "04", title: t('home.steps.step4.title', 'Suivi jusqu\'à tous vos documents'), description: t('home.steps.step4.desc', 'Suivi personnalisé en temps réel') },
   ];
 
   const defaultTestimonials: HomeTestimonial[] = [
-    {
-      name: "Inocent KOFFI",
-      company: "AGRICAPITAL SARL",
-      region: "Daloa",
-      rating: 5,
-      comment: t('home.testimonials.koffi', 'Service rapide et professionnel. L\'équipe Legal Form a été disponible à chaque étape.'),
-      logo: "/images/agricapital-logo.jpg",
-    },
-    {
-      name: "KOUASSI Marie",
-      company: "TECHNOVATE SARL",
-      region: "Abidjan",
-      rating: 5,
-      comment: t('home.testimonials.kouassi', 'J\'ai créé mon entreprise en peu de temps.'),
-    },
-    {
-      name: "DIALLO Amadou",
-      company: "BATIR CI SARL",
-      region: "Bouaké",
-      rating: 5,
-      comment: t('home.testimonials.diallo', 'Processus simplifié, équipe compétente. Je recommande vivement Legal Form.'),
-    },
+    { name: "Inocent KOFFI", company: "AGRICAPITAL SARL", region: "Daloa", rating: 5, comment: t('home.testimonials.koffi', 'Service rapide et professionnel. L\'équipe Legal Form a été disponible à chaque étape.'), logo: "/images/agricapital-logo.jpg" },
+    { name: "KOUASSI Marie", company: "TECHNOVATE SARL", region: "Abidjan", rating: 5, comment: t('home.testimonials.kouassi', 'J\'ai créé mon entreprise en peu de temps.') },
+    { name: "DIALLO Amadou", company: "BATIR CI SARL", region: "Bouaké", rating: 5, comment: t('home.testimonials.diallo', 'Processus simplifié, équipe compétente. Je recommande vivement Legal Form.') },
   ];
 
   const [testimonials, setTestimonials] = useState<HomeTestimonial[]>(defaultTestimonials);
 
-  useEffect(() => {
-    setTestimonials(defaultTestimonials);
-  }, [t]);
+  useEffect(() => { setTestimonials(defaultTestimonials); }, [t]);
 
   useEffect(() => {
     const fetchApprovedTestimonials = async () => {
@@ -132,21 +95,16 @@ const Index = () => {
         .eq("is_approved", true)
         .order("created_at", { ascending: false })
         .limit(3);
-
       if (error || !data?.length) return;
-
-      setTestimonials(
-        data.map((item) => ({
-          name: item.name,
-          company: item.company || "Client Legal Form",
-          region: item.location || "Côte d'Ivoire",
-          rating: item.rating || 5,
-          comment: item.message,
-          logo: item.avatar_url || undefined,
-        }))
-      );
+      setTestimonials(data.map((item) => ({
+        name: item.name,
+        company: item.company || "Client Legal Form",
+        region: item.location || "Côte d'Ivoire",
+        rating: item.rating || 5,
+        comment: item.message,
+        logo: item.avatar_url || undefined,
+      })));
     };
-
     fetchApprovedTestimonials();
   }, []);
 
@@ -191,8 +149,11 @@ const Index = () => {
                 {t('home.hero.subtitle', 'Créer, gérer et accompagner votre entreprise en Côte d\'Ivoire et partout dans le monde.')}
               </p>
               
+              {/* AI Search Bar - FIRST element */}
+              <HeroSearchBar />
+
               {/* Value proposition banner */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-6 border border-white/20 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-6 border border-white/20 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-250">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-accent rounded-lg">
                     <Gift className="h-6 w-6 text-white" />
@@ -205,9 +166,6 @@ const Index = () => {
                   </div>
                 </div>
               </div>
-              
-              {/* AI Search Bar */}
-              <HeroSearchBar />
 
               <div className="flex flex-col sm:flex-row gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
                 <Link to="/create">
@@ -222,14 +180,21 @@ const Index = () => {
                   </Button>
                 </Link>
               </div>
+            </div>
+            
+            {/* Right side - News Section + Advantages */}
+            <div className="lg:col-span-2 space-y-6 animate-in fade-in slide-in-from-right-4 duration-1000 delay-300">
+              <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-5 border border-white/10">
+                <NewsSection />
+              </div>
               
-              {/* Advantages highlights - replacing prices */}
-              <div className="mt-8 flex flex-wrap gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-400">
+              {/* Advantages - moved here from below CTA buttons */}
+              <div className="grid grid-cols-2 gap-3">
                 {advantages.map((adv, i) => {
                   const Icon = adv.icon;
                   return (
-                    <div key={i} className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20 flex items-center gap-2">
-                      <Icon className="h-4 w-4 text-accent" />
+                    <div key={i} className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/20 flex items-center gap-2">
+                      <Icon className="h-4 w-4 text-accent flex-shrink-0" />
                       <div>
                         <p className="text-white font-semibold text-xs">{adv.title}</p>
                         <p className="text-white/70 text-[10px]">{adv.desc}</p>
@@ -237,13 +202,6 @@ const Index = () => {
                     </div>
                   );
                 })}
-              </div>
-            </div>
-            
-            {/* Right side - News Section */}
-            <div className="lg:col-span-2 animate-in fade-in slide-in-from-right-4 duration-1000 delay-300">
-              <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-5 border border-white/10">
-                <NewsSection />
               </div>
             </div>
           </div>
@@ -273,9 +231,7 @@ const Index = () => {
                         <Icon className="h-8 w-8 text-primary group-hover:text-white" />
                       </div>
                       <div>
-                        <h3 className="font-heading font-semibold text-xl text-foreground mb-2">
-                          {service.title}
-                        </h3>
+                        <h3 className="font-heading font-semibold text-xl text-foreground mb-2">{service.title}</h3>
                         <p className="text-muted-foreground mb-4">{service.description}</p>
                         <ul className="space-y-2">
                           {service.items.map((item, i) => (
@@ -323,9 +279,7 @@ const Index = () => {
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-hero text-white font-heading font-bold text-2xl mb-4 shadow-soft">
                     {step.number}
                   </div>
-                  <h3 className="font-heading font-semibold text-lg text-foreground mb-2">
-                    {step.title}
-                  </h3>
+                  <h3 className="font-heading font-semibold text-lg text-foreground mb-2">{step.title}</h3>
                   <p className="text-muted-foreground">{step.description}</p>
                 </div>
                 {index < steps.length - 1 && (
@@ -365,14 +319,8 @@ const Index = () => {
                   <div className="flex items-center gap-4 mb-4">
                     <div className="w-16 h-16 rounded-full overflow-hidden bg-white border-2 border-primary/20 flex items-center justify-center p-1">
                       {testimonial.logo ? (
-                        <img 
-                          src={testimonial.logo} 
-                          alt={testimonial.company} 
-                          className="w-full h-full object-contain rounded-full"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                          }}
+                        <img src={testimonial.logo} alt={testimonial.company} className="w-full h-full object-contain rounded-full"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden'); }}
                         />
                       ) : null}
                       <span className={`text-xl font-bold text-primary ${testimonial.logo ? 'hidden' : ''}`}>
@@ -405,10 +353,9 @@ const Index = () => {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link to="/testimonials#form">
+            <Link to="/testimonials?action=submit">
               <Button size="lg" className="bg-accent hover:bg-accent/90 text-white">
-                <Star className="mr-2 h-5 w-5" />
-                {t('home.testimonials.leave', 'Laisser un témoignage')}
+                {t('home.testimonials.submit', 'Laisser un témoignage')}
               </Button>
             </Link>
           </div>
