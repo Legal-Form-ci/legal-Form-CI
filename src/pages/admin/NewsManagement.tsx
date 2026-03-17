@@ -748,7 +748,7 @@ const NewsManagement = () => {
           <Card>
             <CardContent className="p-4">
               <p className="text-muted-foreground text-sm">Brouillons</p>
-              <p className="text-2xl font-bold text-yellow-500">{posts.filter(p => !p.is_published).length}</p>
+              <p className="text-2xl font-bold text-accent">{posts.filter(p => !p.is_published).length}</p>
             </CardContent>
           </Card>
           <Card>
