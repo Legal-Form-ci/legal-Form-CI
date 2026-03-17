@@ -630,17 +630,26 @@ const NewsManagement = () => {
                       <div className="border rounded-md p-4 min-h-[400px] max-h-[500px] overflow-y-auto prose prose-sm max-w-none dark:prose-invert">
                         {formData.content ? (
                           <ReactMarkdown
+                            rehypePlugins={[rehypeRaw]}
                             components={{
                               h1: ({children}) => <h1 className="text-3xl font-bold text-primary mb-4 mt-6">{children}</h1>,
-                              h2: ({children}) => <h2 className="text-2xl font-semibold text-foreground mb-3 mt-5">{children}</h2>,
+                              h2: ({children}) => <h2 className="text-2xl font-semibold text-foreground mb-3 mt-5 pb-2 border-b border-border">{children}</h2>,
                               h3: ({children}) => <h3 className="text-xl font-medium text-foreground mb-2 mt-4">{children}</h3>,
-                              p: ({children}) => <p className="mb-4 leading-relaxed">{children}</p>,
+                              p: ({children}) => <p className="mb-4 leading-relaxed text-foreground/90">{children}</p>,
                               ul: ({children}) => <ul className="list-disc list-inside mb-4 space-y-1">{children}</ul>,
                               ol: ({children}) => <ol className="list-decimal list-inside mb-4 space-y-1">{children}</ol>,
-                              blockquote: ({children}) => <blockquote className="border-l-4 border-primary pl-4 italic my-4 bg-muted/50 py-2">{children}</blockquote>,
-                              table: ({children}) => <table className="w-full border-collapse border my-4">{children}</table>,
-                              th: ({children}) => <th className="border p-2 bg-muted font-semibold text-left">{children}</th>,
-                              td: ({children}) => <td className="border p-2">{children}</td>,
+                              blockquote: ({children}) => <blockquote className="border-l-4 border-primary pl-4 italic my-4 bg-muted/50 py-2 rounded-r">{children}</blockquote>,
+                              table: ({children}) => <div className="overflow-x-auto my-6 rounded-lg border border-border"><table className="w-full border-collapse">{children}</table></div>,
+                              thead: ({children}) => <thead className="bg-primary text-primary-foreground">{children}</thead>,
+                              th: ({children}) => <th className="px-4 py-3 text-left text-sm font-bold">{children}</th>,
+                              td: ({children}) => <td className="px-4 py-3 border-t border-border text-sm">{children}</td>,
+                              tr: ({children, ...props}) => {
+                                const node = props.node as any;
+                                const parent = node?.parentNode;
+                                const isBody = parent?.tagName === 'tbody';
+                                const idx = isBody ? Array.from(parent?.children || []).indexOf(node) : -1;
+                                return <tr className={isBody && idx % 2 === 1 ? 'bg-muted/50' : ''}>{children}</tr>;
+                              },
                               code: ({children, className}) => className ? (
                                 <pre className="bg-muted p-3 rounded-md overflow-x-auto my-4"><code className="text-sm">{children}</code></pre>
                               ) : (
@@ -648,7 +657,7 @@ const NewsManagement = () => {
                               ),
                               hr: () => <hr className="my-6 border-t-2 border-muted" />,
                               a: ({href, children}) => <a href={href} className="text-primary underline hover:text-primary/80" target="_blank" rel="noopener noreferrer">{children}</a>,
-                              img: ({src, alt}) => <img src={src} alt={alt || ''} className="max-w-full h-auto rounded-lg my-4" />,
+                              img: ({src, alt}) => <img src={src} alt={alt || ''} className="max-w-full h-auto rounded-lg my-4 shadow-sm" />,
                             }}
                           >
                             {formData.content}
