@@ -849,15 +849,15 @@ const NewsManagement = () => {
                       <TableCell>
                         <div className="flex gap-2">
                           <Button size="icon" variant="ghost" onClick={() => handleEdit(post)}>
-                            <Edit2 className="h-4 w-4 text-blue-400" />
+                            <Edit2 className="h-4 w-4 text-primary" />
                           </Button>
                           <Button size="icon" variant="ghost" asChild>
                             <a href={`/blog/${post.slug}`} target="_blank" rel="noopener noreferrer">
-                              <Eye className="h-4 w-4 text-green-400" />
+                              <Eye className="h-4 w-4 text-primary" />
                             </a>
                           </Button>
                           <Button size="icon" variant="ghost" onClick={() => handleDelete(post.id)}>
-                            <Trash2 className="h-4 w-4 text-red-400" />
+                            <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>
                       </TableCell>
