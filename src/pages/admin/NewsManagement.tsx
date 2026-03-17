@@ -838,7 +838,7 @@ const NewsManagement = () => {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={post.is_published ? "default" : "secondary"} className={post.is_published ? "bg-green-500" : "bg-yellow-500"}>
+                        <Badge variant={post.is_published ? "default" : "secondary"} className={post.is_published ? "bg-primary" : "bg-accent text-accent-foreground"}>
                           {post.is_published ? "Publié" : "Brouillon"}
                         </Badge>
                       </TableCell>
