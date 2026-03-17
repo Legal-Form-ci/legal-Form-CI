@@ -17,6 +17,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AIContentGenerator from "@/components/AIContentGenerator";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import { 
   Plus, 
   Edit2, 
