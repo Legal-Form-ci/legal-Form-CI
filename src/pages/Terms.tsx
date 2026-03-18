@@ -24,7 +24,7 @@ const Terms = () => {
 
       if (data) {
         setTitle(data.title);
-        setSections(Array.isArray(data.content) ? data.content as Section[] : []);
+        setSections(Array.isArray(data.content) ? (data.content as unknown as Section[]) : []);
         setUpdatedAt(new Date(data.updated_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }));
       }
     };

@@ -114,11 +114,11 @@ const LexIA = () => {
 
       // Save assistant message to DB
       if (conversationId) {
-        await supabase.from('lexia_messages').insert({
+        supabase.from('lexia_messages').insert({
           conversation_id: conversationId,
           role: 'assistant',
           content: assistantMessage.content
-        }).catch(e => console.error('Failed to save message:', e));
+        }).then(({ error }) => { if (error) console.error('Failed to save message:', error); });
       }
     } catch (error: any) {
       console.error('Error sending message:', error);
