@@ -193,8 +193,12 @@ export type Database = {
       company_requests: {
         Row: {
           activity: string | null
+          additional_services: string[] | null
+          address: string | null
           assigned_to: string | null
           associates: Json | null
+          bank: string | null
+          bp: string | null
           capital: string | null
           city: string | null
           client_rating: number | null
@@ -203,13 +207,18 @@ export type Database = {
           company_type: string
           contact_name: string | null
           created_at: string
+          discount_applied: number | null
           documents: Json | null
           email: string | null
           estimated_price: number | null
           id: string
           manager_email: string | null
+          manager_mandate_duration: string | null
+          manager_marital_regime: string | null
+          manager_marital_status: string | null
           manager_name: string | null
           manager_phone: string | null
+          manager_residence: string | null
           notes: string | null
           payment_amount: number | null
           payment_reference: string | null
@@ -218,6 +227,7 @@ export type Database = {
           referral_code: string | null
           referrer_code: string | null
           region: string | null
+          sigle: string | null
           status: string
           structure_type: string | null
           tracking_number: string | null
@@ -226,8 +236,12 @@ export type Database = {
         }
         Insert: {
           activity?: string | null
+          additional_services?: string[] | null
+          address?: string | null
           assigned_to?: string | null
           associates?: Json | null
+          bank?: string | null
+          bp?: string | null
           capital?: string | null
           city?: string | null
           client_rating?: number | null
@@ -236,13 +250,18 @@ export type Database = {
           company_type?: string
           contact_name?: string | null
           created_at?: string
+          discount_applied?: number | null
           documents?: Json | null
           email?: string | null
           estimated_price?: number | null
           id?: string
           manager_email?: string | null
+          manager_mandate_duration?: string | null
+          manager_marital_regime?: string | null
+          manager_marital_status?: string | null
           manager_name?: string | null
           manager_phone?: string | null
+          manager_residence?: string | null
           notes?: string | null
           payment_amount?: number | null
           payment_reference?: string | null
@@ -251,6 +270,7 @@ export type Database = {
           referral_code?: string | null
           referrer_code?: string | null
           region?: string | null
+          sigle?: string | null
           status?: string
           structure_type?: string | null
           tracking_number?: string | null
@@ -259,8 +279,12 @@ export type Database = {
         }
         Update: {
           activity?: string | null
+          additional_services?: string[] | null
+          address?: string | null
           assigned_to?: string | null
           associates?: Json | null
+          bank?: string | null
+          bp?: string | null
           capital?: string | null
           city?: string | null
           client_rating?: number | null
@@ -269,13 +293,18 @@ export type Database = {
           company_type?: string
           contact_name?: string | null
           created_at?: string
+          discount_applied?: number | null
           documents?: Json | null
           email?: string | null
           estimated_price?: number | null
           id?: string
           manager_email?: string | null
+          manager_mandate_duration?: string | null
+          manager_marital_regime?: string | null
+          manager_marital_status?: string | null
           manager_name?: string | null
           manager_phone?: string | null
+          manager_residence?: string | null
           notes?: string | null
           payment_amount?: number | null
           payment_reference?: string | null
@@ -284,6 +313,7 @@ export type Database = {
           referral_code?: string | null
           referrer_code?: string | null
           region?: string | null
+          sigle?: string | null
           status?: string
           structure_type?: string | null
           tracking_number?: string | null
@@ -734,6 +764,33 @@ export type Database = {
           title?: string
           type?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      page_contents: {
+        Row: {
+          content: Json
+          id: string
+          page_key: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          content?: Json
+          id?: string
+          page_key: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          content?: Json
+          id?: string
+          page_key?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }

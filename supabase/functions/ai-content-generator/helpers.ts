@@ -202,7 +202,7 @@ const uploadDataUrlToStorage = async (dataUrl: string, filePath: string): Promis
   const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
 
   const { error: uploadError } = await supabaseClient.storage
-    .from("company-logos")
+    .from("blog-images")
     .upload(filePath, binaryData, { contentType: mimeType, upsert: true });
 
   if (uploadError) {
@@ -210,7 +210,7 @@ const uploadDataUrlToStorage = async (dataUrl: string, filePath: string): Promis
     return null;
   }
 
-  const { data: urlData } = supabaseClient.storage.from("company-logos").getPublicUrl(filePath);
+  const { data: urlData } = supabaseClient.storage.from("blog-images").getPublicUrl(filePath);
   return urlData?.publicUrl || null;
 };
 

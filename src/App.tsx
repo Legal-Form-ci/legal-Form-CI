@@ -66,6 +66,7 @@ import ClientMessages from "./pages/client/Messages";
 import ContactMessages from "./pages/admin/ContactMessages";
 import CompaniesShowcase from "./pages/admin/CompaniesShowcase";
 import SearchResults from "./pages/SearchResults";
+import PageContentsAdmin from "./pages/admin/PageContentsAdmin";
 
 const queryClient = new QueryClient();
 
@@ -158,6 +159,7 @@ const App = () => (
           <Route path="/admin/messages" element={<AdminMessages />} />
           <Route path="/admin/contacts" element={<ContactMessages />} />
           <Route path="/admin/showcase" element={<CompaniesShowcase />} />
+          <Route path="/admin/pages" element={<PageContentsAdmin />} />
           <Route path="/client/messages" element={<ClientMessages />} />
           <Route path="/mes-messages" element={<ClientMessages />} />
           <Route path="/search-results" element={<SearchResults />} />
