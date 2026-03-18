@@ -66,6 +66,7 @@ import ClientMessages from "./pages/client/Messages";
 import ContactMessages from "./pages/admin/ContactMessages";
 import CompaniesShowcase from "./pages/admin/CompaniesShowcase";
 import SearchResults from "./pages/SearchResults";
+import PageContentsAdmin from "./pages/admin/PageContentsAdmin";
 
 const queryClient = new QueryClient();
 
