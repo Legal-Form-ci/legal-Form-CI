@@ -180,13 +180,13 @@ const NewsManagement = () => {
         const filePath = `blog/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
-          .from('company-logos')
+          .from('blog-images')
           .upload(filePath, file, { upsert: true });
 
         if (uploadError) throw uploadError;
 
         const { data: urlData } = supabase.storage
-          .from('company-logos')
+          .from('blog-images')
           .getPublicUrl(filePath);
 
         uploadedUrls.push(urlData.publicUrl);

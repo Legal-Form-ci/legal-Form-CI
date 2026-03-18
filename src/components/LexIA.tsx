@@ -96,12 +96,17 @@ const LexIA = () => {
         }
       });
 
-      if (response.error) throw response.error;
+      if (response.error) {
+        console.error('LexIA invoke error:', response.error);
+        throw new Error(response.error.message || 'Erreur de communication');
+      }
+
+      const responseContent = response.data?.response || response.data?.error || "Désolé, je n'ai pas pu traiter votre demande. Veuillez réessayer.";
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: response.data.response,
+        content: responseContent,
         timestamp: new Date()
       };
 
@@ -113,15 +118,19 @@ const LexIA = () => {
           conversation_id: conversationId,
           role: 'assistant',
           content: assistantMessage.content
-        });
+        }).catch(e => console.error('Failed to save message:', e));
       }
     } catch (error: any) {
       console.error('Error sending message:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible d'envoyer le message. Veuillez réessayer.",
-        variant: "destructive"
-      });
+      
+      // Add fallback message in chat instead of just toast
+      const fallbackMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "Désolé, une erreur s'est produite. Veuillez réessayer dans quelques instants ou contactez-nous à contact@legalform.ci ou au +225 07 09 67 79 25.",
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, fallbackMessage]);
     } finally {
       setIsLoading(false);
     }
