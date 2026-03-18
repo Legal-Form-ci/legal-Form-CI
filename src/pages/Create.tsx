@@ -1052,27 +1052,18 @@ const Create = () => {
                   <div className="bg-primary/10 p-6 rounded-lg border-2 border-primary/20">
                     <div className="flex justify-between items-center mb-4">
                       <p className="text-lg font-semibold">
-                        {t('create.estimatedPrice', 'Tarif estimé')} :
+                        {t('create.invoiceNotice', 'Facturation')} :
                       </p>
-                      {additionalServices.length > 0 ? (
-                        <p className="text-2xl font-bold text-primary">
-                          {t('create.onQuote', 'Sur devis')}
-                        </p>
-                      ) : (
-                        <p className="text-2xl font-bold text-primary">
-                          {formatNumber(calculatePrice(!!(referralCode && referrerName)))} FCFA
-                        </p>
-                      )}
+                      <p className="text-lg font-bold text-primary">
+                        {t('create.invoiceMessage', 'Une facture personnalisée vous sera envoyée')}
+                      </p>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {locationData.city.toLowerCase().includes('abidjan') 
-                        ? `Tarif Abidjan : ${formatNumber(settings.pricing.abidjan)} FCFA`
-                        : `Tarif Intérieur : ${formatNumber(settings.pricing.interior)} FCFA`
-                      }
+                      Une facture générée et adaptée à votre demande vous sera envoyée après étude de votre dossier. Le tarif varie selon la forme juridique, la localisation et les spécificités de votre projet.
                     </p>
                     {referrerName && (
                       <p className="text-sm text-accent font-medium mt-2">
-                        ✅ Parrainage validé par {referrerName} — réduction de {formatNumber(settings.pricing.referral_bonus)} FCFA appliquée.
+                        ✅ Parrainage validé par {referrerName} — une réduction sera appliquée sur votre facture.
                       </p>
                     )}
                   </div>
