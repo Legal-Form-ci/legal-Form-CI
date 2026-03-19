@@ -260,7 +260,6 @@ const Auth = () => {
                         minLength={6}
                       />
                       <PasswordStrengthIndicator password={password} />
-                      />
                     </div>
                     <Button type="submit" className="w-full">
                       {t('auth.signupButton')}

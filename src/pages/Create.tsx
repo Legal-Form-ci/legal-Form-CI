@@ -242,11 +242,7 @@ const Create = () => {
 
   const isUnipersonnelle = companyData.structureType === 'sarlu' || companyData.structureType === 'sasu' || companyData.structureType === 'ei';
 
-  const calculatePrice = (hasReferral: boolean = false) => {
-    const isAbidjan = locationData.city.toLowerCase().includes('abidjan');
-    const basePrice = isAbidjan ? settings.pricing.abidjan : settings.pricing.interior;
-    // Apply referral discount
-    return hasReferral ? basePrice - settings.pricing.referral_bonus : basePrice;
+  const isUnipersonnelle = companyData.structureType === 'sarlu' || companyData.structureType === 'sasu' || companyData.structureType === 'ei';
   };
 
   const addAssociate = () => {
