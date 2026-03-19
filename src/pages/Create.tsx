@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { Building2, MapPin, FileText, CheckCircle2, Users, UserCircle, Plus, Trash2, Gift, User, IdCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useKkiapay } from "@/hooks/useKkiapay";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
