@@ -180,4 +180,40 @@
   .number-format {
     font-variant-numeric: tabular-nums;
   }
+
+  /* Article content tables - professional styling */
+  .article-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid hsl(var(--border));
+  }
+
+  .article-content thead {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+
+  .article-content th {
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    text-align: left;
+    font-size: 0.875rem;
+  }
+
+  .article-content td {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  .article-content tr:nth-child(even) {
+    background: hsl(var(--muted) / 0.5);
+  }
+
+  .article-content tr:hover {
+    background: hsl(var(--muted) / 0.8);
+  }
 }

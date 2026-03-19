@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { Building2, MapPin, FileText, CheckCircle2, Users, UserCircle, Plus, Trash2, Gift, User, IdCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useKkiapay } from "@/hooks/useKkiapay";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -66,6 +65,14 @@ const clearDraft = () => {
 };
 
 const Create = () => {
+  // Clear draft on fresh navigation to ensure a blank form each time
+  useEffect(() => {
+    // Only clear if there's no explicit "resume" param
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has('resume')) {
+      clearDraft();
+    }
+  }, []);
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const { user, loading } = useAuth();
@@ -73,58 +80,7 @@ const Create = () => {
   const navigate = useNavigate();
   const { settings } = useSiteSettings();
   
-  // Store request ID for payment callback
-  const [pendingRequestId, setPendingRequestId] = useState<string | null>(null);
   
-  // KkiaPay integration
-  const { openPayment, isReady: kkiapayReady } = useKkiapay({
-    onSuccess: async (response) => {
-      console.log('[Create] KkiaPay payment success:', response);
-      
-      // Verify payment on backend
-      try {
-        await supabase.functions.invoke('verify-kkiapay-payment', {
-          body: {
-            transactionId: response.transactionId,
-            requestId: pendingRequestId,
-            amount: response.amount
-          }
-        });
-      } catch (err) {
-        console.error('[Create] Payment verification error:', err);
-      }
-      
-      toast({
-        title: t('create.paymentSuccess', 'Paiement réussi !'),
-        description: t('create.paymentSuccessDesc', 'Votre demande a été enregistrée avec succès.'),
-      });
-      
-      clearDraft();
-      navigate("/client/dashboard");
-    },
-    onFailed: (error) => {
-      console.error('[Create] KkiaPay payment failed:', error);
-      toast({
-        title: t('create.paymentFailed', 'Échec du paiement'),
-        description: t('create.paymentFailedDesc', 'Votre demande a été enregistrée. Vous pourrez payer depuis votre espace client.'),
-      });
-      navigate("/client/dashboard");
-    },
-    onClose: () => {
-      console.log('[Create] KkiaPay widget closed');
-      // Widget closed without payment - redirect to dashboard
-      if (pendingRequestId) {
-        toast({
-          title: t('create.success', 'Demande enregistrée'),
-          description: t('create.paymentLater', 'Votre demande a été enregistrée. Vous pourrez effectuer le paiement depuis votre espace client.'),
-        });
-        navigate("/client/dashboard");
-      }
-      setIsSubmitting(false);
-    }
-  });
-
-  // Load draft on mount
   const draft = loadDraft();
 
   const [step, setStep] = useState(() => draft?.step || 1);
@@ -286,13 +242,6 @@ const Create = () => {
 
   const isUnipersonnelle = companyData.structureType === 'sarlu' || companyData.structureType === 'sasu' || companyData.structureType === 'ei';
 
-  const calculatePrice = (hasReferral: boolean = false) => {
-    const isAbidjan = locationData.city.toLowerCase().includes('abidjan');
-    const basePrice = isAbidjan ? settings.pricing.abidjan : settings.pricing.interior;
-    // Apply referral discount
-    return hasReferral ? basePrice - settings.pricing.referral_bonus : basePrice;
-  };
-
   const addAssociate = () => {
     if (isUnipersonnelle) return;
     setAssociates([...associates, {
@@ -332,11 +281,8 @@ const Create = () => {
     
     try {
       const hasValidReferral = !!(referralCode && referrerName);
-      const estimatedPrice = calculatePrice(hasValidReferral);
       
-      console.log('[Create] Starting submission for:', companyData.companyName);
-      
-      // Create the company request
+      // Create the company request - NO PAYMENT
       const { data: requestData, error: requestError } = await supabase
         .from('company_requests')
         .insert({
@@ -359,8 +305,8 @@ const Create = () => {
           manager_marital_regime: managerData.maritalRegime,
           manager_mandate_duration: managerData.mandatDuration,
           additional_services: additionalServices,
-          estimated_price: estimatedPrice,
           status: 'pending',
+          payment_status: 'unpaid',
           referrer_code: hasValidReferral ? referralCode : null,
           discount_applied: hasValidReferral ? 10000 : 0,
         })
@@ -372,8 +318,6 @@ const Create = () => {
         throw new Error(requestError.message || 'Erreur lors de la création de la demande');
       }
 
-      console.log('[Create] Request created:', requestData.id);
-
       // Trigger new request notification
       try {
         await supabase.functions.invoke('send-notification', {
@@ -382,10 +326,11 @@ const Create = () => {
       } catch (e) {
         console.error('Notification error:', e);
       }
+
       // Insert associates
       for (const associate of associates) {
         if (associate.fullName) {
-          const { error: assocError } = await supabase.from('company_associates').insert({
+          await supabase.from('company_associates').insert({
             company_request_id: requestData.id,
             full_name: associate.fullName,
             phone: associate.phone,
@@ -395,67 +340,15 @@ const Create = () => {
             marital_status: associate.maritalStatus,
             marital_regime: associate.maritalRegime,
           });
-          
-          if (assocError) {
-            console.error('[Create] Error adding associate:', assocError);
-          }
         }
       }
 
-      // If additional services selected, price is "Sur devis" - go to dashboard
-      if (additionalServices.length > 0) {
-        clearDraft();
-        toast({
-          title: t('create.requestSent', 'Demande envoyée'),
-          description: t('create.quoteMessage', 'Votre demande sera étudiée et un devis vous sera communiqué.'),
-        });
-        setIsSubmitting(false);
-        navigate("/client/dashboard");
-        return;
-      }
-
-      // Store request ID for payment callback
-      setPendingRequestId(requestData.id);
-
-      // Open KkiaPay widget directly
-      if (kkiapayReady) {
-        console.log('[Create] Opening KkiaPay widget...');
-        const paymentOpened = openPayment({
-          amount: estimatedPrice,
-          name: managerData.fullName,
-          email: managerData.email,
-          phone: managerData.phone?.replace(/[^0-9]/g, ''),
-          reason: `Création ${companyData.structureType.toUpperCase()} - ${companyData.companyName}`,
-          data: {
-            requestId: requestData.id,
-            requestType: 'company',
-            trackingNumber: requestData.tracking_number
-          }
-        });
-
-        if (!paymentOpened) {
-          console.error('[Create] Failed to open KkiaPay widget');
-          // Widget failed to open, but request was saved - go to dashboard
-          clearDraft();
-          toast({
-            title: t('create.success', 'Demande enregistrée'),
-            description: t('create.paymentLater', 'Votre demande a été enregistrée. Vous pourrez effectuer le paiement depuis votre espace client.'),
-          });
-          setIsSubmitting(false);
-          navigate("/client/dashboard");
-        }
-        // If widget opened, the callbacks (onSuccess, onFailed, onClose) will handle navigation
-      } else {
-        // KkiaPay not ready - go to dashboard
-        console.log('[Create] KkiaPay not ready, redirecting to dashboard');
-        clearDraft();
-        toast({
-          title: t('create.success', 'Demande enregistrée'),
-          description: t('create.paymentLater', 'Votre demande a été enregistrée. Vous pourrez effectuer le paiement depuis votre espace client.'),
-        });
-        setIsSubmitting(false);
-        navigate("/client/dashboard");
-      }
+      clearDraft();
+      toast({
+        title: t('create.requestSent', 'Demande envoyée'),
+        description: t('create.requestSentDesc', 'Votre demande a été enregistrée avec succès. Une facture vous sera envoyée après étude de votre dossier.'),
+      });
+      navigate("/client/dashboard");
       
     } catch (error: any) {
       console.error('[Create] Submission error:', error);
@@ -464,6 +357,7 @@ const Create = () => {
         description: error.message || "Une erreur est survenue lors de l'enregistrement",
         variant: "destructive",
       });
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -1090,9 +984,7 @@ const Create = () => {
                   >
                     {isSubmitting 
                       ? t('create.processing', 'Traitement en cours...') 
-                      : additionalServices.length > 0 
-                        ? t('create.submitRequest', 'Envoyer la demande')
-                        : t('create.proceedPayment', 'Procéder au paiement')
+                      : t('create.submitRequest', 'Soumettre ma demande')
                     }
                   </Button>
                 )}

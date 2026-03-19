@@ -6,7 +6,7 @@ const translationCache = new Map<string, string>();
 
 /**
  * Hook for automatic translation of dynamic content.
- * Uses Lovable AI via edge function for real-time translation.
+ * Uses IKNov AI via edge function for real-time translation.
  * Caches results to avoid repeated API calls.
  */
 export const useAutoTranslate = () => {

@@ -122,21 +122,50 @@ const NewDashboard = () => {
     }
   };
 
-  const chartData = [
-    { name: 'Jan', companies: 12, services: 8 },
-    { name: 'Fév', companies: 19, services: 12 },
-    { name: 'Mar', companies: 15, services: 10 },
-    { name: 'Avr', companies: 25, services: 18 },
-    { name: 'Mai', companies: 22, services: 15 },
-    { name: 'Juin', companies: 30, services: 22 },
-  ];
+  // Build chart data from real DB data
+  const [chartData, setChartData] = useState<{name: string; companies: number; services: number}[]>([]);
+  const [pieData, setPieData] = useState<{name: string; value: number; color: string}[]>([]);
 
-  const pieData = [
-    { name: 'SARL', value: 45, color: '#0891b2' },
-    { name: 'SARLU', value: 25, color: '#0d9488' },
-    { name: 'SAS', value: 15, color: '#059669' },
-    { name: 'Autres', value: 15, color: '#6366f1' },
-  ];
+  useEffect(() => {
+    if (!loadingData) {
+      buildChartData();
+    }
+  }, [loadingData, recentActivities]);
+
+  const buildChartData = async () => {
+    try {
+      const { data: companies } = await supabase.from('company_requests').select('created_at, structure_type');
+      const { data: services } = await supabase.from('service_requests').select('created_at');
+      
+      const months = ['Jan','Fév','Mar','Avr','Mai','Juin','Jul','Aoû','Sep','Oct','Nov','Déc'];
+      const now = new Date();
+      const last6 = Array.from({length: 6}, (_, i) => {
+        const d = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1);
+        return { month: d.getMonth(), year: d.getFullYear(), name: months[d.getMonth()] };
+      });
+
+      const cData = last6.map(m => ({
+        name: m.name,
+        companies: (companies || []).filter(c => { const d = new Date(c.created_at); return d.getMonth() === m.month && d.getFullYear() === m.year; }).length,
+        services: (services || []).filter(s => { const d = new Date(s.created_at); return d.getMonth() === m.month && d.getFullYear() === m.year; }).length,
+      }));
+      setChartData(cData);
+
+      // Pie: group by structure_type
+      const typeCounts: Record<string, number> = {};
+      (companies || []).forEach(c => {
+        const t = (c.structure_type || 'autre').toUpperCase();
+        typeCounts[t] = (typeCounts[t] || 0) + 1;
+      });
+      const colors = ['#0891b2', '#0d9488', '#059669', '#6366f1', '#f59e0b', '#ef4444'];
+      const pData = Object.entries(typeCounts).map(([name, value], i) => ({
+        name, value, color: colors[i % colors.length]
+      }));
+      setPieData(pData.length > 0 ? pData : [{ name: 'Aucune', value: 0, color: '#94a3b8' }]);
+    } catch (e) {
+      console.error('Chart data error:', e);
+    }
+  };
 
   const getGrowthPercentage = () => {
     if (stats.lastMonthCompanies === 0) return stats.thisMonthCompanies > 0 ? 100 : 0;
