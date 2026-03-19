@@ -1043,9 +1043,7 @@ const Create = () => {
                   >
                     {isSubmitting 
                       ? t('create.processing', 'Traitement en cours...') 
-                      : additionalServices.length > 0 
-                        ? t('create.submitRequest', 'Envoyer la demande')
-                        : t('create.proceedPayment', 'Procéder au paiement')
+                      : t('create.submitRequest', 'Soumettre ma demande')
                     }
                   </Button>
                 )}
