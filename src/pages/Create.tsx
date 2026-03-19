@@ -242,9 +242,6 @@ const Create = () => {
 
   const isUnipersonnelle = companyData.structureType === 'sarlu' || companyData.structureType === 'sasu' || companyData.structureType === 'ei';
 
-  const isUnipersonnelle = companyData.structureType === 'sarlu' || companyData.structureType === 'sasu' || companyData.structureType === 'ei';
-  };
-
   const addAssociate = () => {
     if (isUnipersonnelle) return;
     setAssociates([...associates, {
