@@ -53,6 +53,7 @@ export type Database = {
           id: string
           images: Json | null
           is_published: boolean | null
+          public_id: string | null
           published_at: string | null
           slug: string
           tags: string[] | null
@@ -72,6 +73,7 @@ export type Database = {
           id?: string
           images?: Json | null
           is_published?: boolean | null
+          public_id?: string | null
           published_at?: string | null
           slug: string
           tags?: string[] | null
@@ -91,6 +93,7 @@ export type Database = {
           id?: string
           images?: Json | null
           is_published?: boolean | null
+          public_id?: string | null
           published_at?: string | null
           slug?: string
           tags?: string[] | null
@@ -702,6 +705,7 @@ export type Database = {
           excerpt: string | null
           id: string
           is_published: boolean | null
+          public_id: string | null
           published_at: string | null
           title: string
           updated_at: string
@@ -715,6 +719,7 @@ export type Database = {
           excerpt?: string | null
           id?: string
           is_published?: boolean | null
+          public_id?: string | null
           published_at?: string | null
           title: string
           updated_at?: string
@@ -728,6 +733,7 @@ export type Database = {
           excerpt?: string | null
           id?: string
           is_published?: boolean | null
+          public_id?: string | null
           published_at?: string | null
           title?: string
           updated_at?: string
