@@ -66,6 +66,14 @@ const clearDraft = () => {
 };
 
 const Create = () => {
+  // Clear draft on fresh navigation to ensure a blank form each time
+  useEffect(() => {
+    // Only clear if there's no explicit "resume" param
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has('resume')) {
+      clearDraft();
+    }
+  }, []);
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const { user, loading } = useAuth();
