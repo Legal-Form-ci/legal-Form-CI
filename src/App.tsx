@@ -149,6 +149,7 @@ const App = () => (
           <Route path="/faq" element={<FAQ />} />
           <Route path="/questions-frequentes" element={<FAQ />} />
           <Route path="/actualites" element={<News />} />
+          <Route path="/actualites/:slug" element={<BlogPost />} />
           <Route path="/news" element={<News />} />
           <Route path="/admin/news" element={<NewsManagement />} />
           <Route path="/admin/database" element={<DatabaseManager />} />

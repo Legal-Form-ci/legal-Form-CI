@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { AlertTriangle, CheckCircle2, Shield, ShieldAlert } from "lucide-react";
+import { ShieldAlert } from "lucide-react";
 
 interface Props {
   password: string;

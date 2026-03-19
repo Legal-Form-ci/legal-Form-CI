@@ -80,58 +80,7 @@ const Create = () => {
   const navigate = useNavigate();
   const { settings } = useSiteSettings();
   
-  // Store request ID for payment callback
-  const [pendingRequestId, setPendingRequestId] = useState<string | null>(null);
   
-  // KkiaPay integration
-  const { openPayment, isReady: kkiapayReady } = useKkiapay({
-    onSuccess: async (response) => {
-      console.log('[Create] KkiaPay payment success:', response);
-      
-      // Verify payment on backend
-      try {
-        await supabase.functions.invoke('verify-kkiapay-payment', {
-          body: {
-            transactionId: response.transactionId,
-            requestId: pendingRequestId,
-            amount: response.amount
-          }
-        });
-      } catch (err) {
-        console.error('[Create] Payment verification error:', err);
-      }
-      
-      toast({
-        title: t('create.paymentSuccess', 'Paiement réussi !'),
-        description: t('create.paymentSuccessDesc', 'Votre demande a été enregistrée avec succès.'),
-      });
-      
-      clearDraft();
-      navigate("/client/dashboard");
-    },
-    onFailed: (error) => {
-      console.error('[Create] KkiaPay payment failed:', error);
-      toast({
-        title: t('create.paymentFailed', 'Échec du paiement'),
-        description: t('create.paymentFailedDesc', 'Votre demande a été enregistrée. Vous pourrez payer depuis votre espace client.'),
-      });
-      navigate("/client/dashboard");
-    },
-    onClose: () => {
-      console.log('[Create] KkiaPay widget closed');
-      // Widget closed without payment - redirect to dashboard
-      if (pendingRequestId) {
-        toast({
-          title: t('create.success', 'Demande enregistrée'),
-          description: t('create.paymentLater', 'Votre demande a été enregistrée. Vous pourrez effectuer le paiement depuis votre espace client.'),
-        });
-        navigate("/client/dashboard");
-      }
-      setIsSubmitting(false);
-    }
-  });
-
-  // Load draft on mount
   const draft = loadDraft();
 
   const [step, setStep] = useState(() => draft?.step || 1);
