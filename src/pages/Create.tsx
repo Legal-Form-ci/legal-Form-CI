@@ -340,11 +340,8 @@ const Create = () => {
     
     try {
       const hasValidReferral = !!(referralCode && referrerName);
-      const estimatedPrice = calculatePrice(hasValidReferral);
       
-      console.log('[Create] Starting submission for:', companyData.companyName);
-      
-      // Create the company request
+      // Create the company request - NO PAYMENT
       const { data: requestData, error: requestError } = await supabase
         .from('company_requests')
         .insert({
@@ -367,8 +364,8 @@ const Create = () => {
           manager_marital_regime: managerData.maritalRegime,
           manager_mandate_duration: managerData.mandatDuration,
           additional_services: additionalServices,
-          estimated_price: estimatedPrice,
           status: 'pending',
+          payment_status: 'unpaid',
           referrer_code: hasValidReferral ? referralCode : null,
           discount_applied: hasValidReferral ? 10000 : 0,
         })
@@ -380,8 +377,6 @@ const Create = () => {
         throw new Error(requestError.message || 'Erreur lors de la création de la demande');
       }
 
-      console.log('[Create] Request created:', requestData.id);
-
       // Trigger new request notification
       try {
         await supabase.functions.invoke('send-notification', {
@@ -390,10 +385,11 @@ const Create = () => {
       } catch (e) {
         console.error('Notification error:', e);
       }
+
       // Insert associates
       for (const associate of associates) {
         if (associate.fullName) {
-          const { error: assocError } = await supabase.from('company_associates').insert({
+          await supabase.from('company_associates').insert({
             company_request_id: requestData.id,
             full_name: associate.fullName,
             phone: associate.phone,
@@ -403,67 +399,15 @@ const Create = () => {
             marital_status: associate.maritalStatus,
             marital_regime: associate.maritalRegime,
           });
-          
-          if (assocError) {
-            console.error('[Create] Error adding associate:', assocError);
-          }
         }
       }
 
-      // If additional services selected, price is "Sur devis" - go to dashboard
-      if (additionalServices.length > 0) {
-        clearDraft();
-        toast({
-          title: t('create.requestSent', 'Demande envoyée'),
-          description: t('create.quoteMessage', 'Votre demande sera étudiée et un devis vous sera communiqué.'),
-        });
-        setIsSubmitting(false);
-        navigate("/client/dashboard");
-        return;
-      }
-
-      // Store request ID for payment callback
-      setPendingRequestId(requestData.id);
-
-      // Open KkiaPay widget directly
-      if (kkiapayReady) {
-        console.log('[Create] Opening KkiaPay widget...');
-        const paymentOpened = openPayment({
-          amount: estimatedPrice,
-          name: managerData.fullName,
-          email: managerData.email,
-          phone: managerData.phone?.replace(/[^0-9]/g, ''),
-          reason: `Création ${companyData.structureType.toUpperCase()} - ${companyData.companyName}`,
-          data: {
-            requestId: requestData.id,
-            requestType: 'company',
-            trackingNumber: requestData.tracking_number
-          }
-        });
-
-        if (!paymentOpened) {
-          console.error('[Create] Failed to open KkiaPay widget');
-          // Widget failed to open, but request was saved - go to dashboard
-          clearDraft();
-          toast({
-            title: t('create.success', 'Demande enregistrée'),
-            description: t('create.paymentLater', 'Votre demande a été enregistrée. Vous pourrez effectuer le paiement depuis votre espace client.'),
-          });
-          setIsSubmitting(false);
-          navigate("/client/dashboard");
-        }
-        // If widget opened, the callbacks (onSuccess, onFailed, onClose) will handle navigation
-      } else {
-        // KkiaPay not ready - go to dashboard
-        console.log('[Create] KkiaPay not ready, redirecting to dashboard');
-        clearDraft();
-        toast({
-          title: t('create.success', 'Demande enregistrée'),
-          description: t('create.paymentLater', 'Votre demande a été enregistrée. Vous pourrez effectuer le paiement depuis votre espace client.'),
-        });
-        setIsSubmitting(false);
-        navigate("/client/dashboard");
-      }
+      clearDraft();
+      toast({
+        title: t('create.requestSent', 'Demande envoyée'),
+        description: t('create.requestSentDesc', 'Votre demande a été enregistrée avec succès. Une facture vous sera envoyée après étude de votre dossier.'),
+      });
+      navigate("/client/dashboard");
       
     } catch (error: any) {
       console.error('[Create] Submission error:', error);
@@ -472,6 +416,7 @@ const Create = () => {
         description: error.message || "Une erreur est survenue lors de l'enregistrement",
         variant: "destructive",
       });
+    } finally {
       setIsSubmitting(false);
     }
   };
