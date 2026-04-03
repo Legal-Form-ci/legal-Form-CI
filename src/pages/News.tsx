@@ -156,7 +156,7 @@ const News = () => {
                       </div>
                     )}
 
-                    <Link to={`/blog/${post.slug}`}>
+                    <Link to={`/actualites/${post.public_id || post.slug}`}>
                       <Button variant="link" className="p-0 text-primary group-hover:underline">
                         {t('news.readMore', 'Lire la suite')}
                         <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
