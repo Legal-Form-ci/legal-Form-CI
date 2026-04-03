@@ -16,6 +16,83 @@ import { LogOut, Plus, FileText, Building2, Clock, CreditCard, MessageSquare, Ey
 import { Progress } from "@/components/ui/progress";
 import { useClientRealtimeNotifications } from "@/hooks/useClientRealtimeNotifications";
 
+const ClientInvoices = ({ userId }: { userId?: string }) => {
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!userId) return;
+    const fetchInvoices = async () => {
+      const { data } = await supabase
+        .from('invoices')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+      setInvoices(data || []);
+      setLoading(false);
+    };
+    fetchInvoices();
+  }, [userId]);
+
+  if (loading) return <div className="text-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" /></div>;
+
+  if (invoices.length === 0) {
+    return (
+      <Card className="border-2">
+        <CardContent className="pt-6 text-center py-12">
+          <CreditCard className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground text-lg">Aucune facture pour le moment</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="grid gap-4">
+      {invoices.map((invoice) => (
+        <Card key={invoice.id} className="border-2 hover:border-primary transition-all">
+          <CardHeader className="pb-3">
+            <div className="flex justify-between items-start">
+              <div>
+                <CardTitle className="text-lg">{invoice.invoice_number}</CardTitle>
+                <CardDescription>{invoice.description || 'Facture'}</CardDescription>
+              </div>
+              <Badge className={invoice.status === 'paid' ? 'bg-green-500 text-white' : 'bg-yellow-500 text-white'}>
+                {invoice.status === 'paid' ? 'Payée' : 'En attente'}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-between items-center">
+              <div className="text-2xl font-bold text-foreground">
+                {new Intl.NumberFormat('fr-FR').format(invoice.amount)} FCFA
+              </div>
+              <div className="flex gap-2">
+                {invoice.status !== 'paid' && (
+                  <Button size="sm" onClick={() => navigate(`/payment/${invoice.request_id || invoice.id}?type=${invoice.request_type || 'company'}`)}>
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    Payer
+                  </Button>
+                )}
+                <Button variant="outline" size="sm">
+                  <Eye className="mr-2 h-4 w-4" />
+                  Détails
+                </Button>
+              </div>
+            </div>
+            {invoice.due_date && (
+              <p className="text-sm text-muted-foreground mt-2">
+                Échéance : {new Date(invoice.due_date).toLocaleDateString('fr-FR')}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
 interface Request {
   id: string;
   status: string;
