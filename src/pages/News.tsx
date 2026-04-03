@@ -21,6 +21,7 @@ interface BlogPost {
   published_at: string | null;
   created_at: string;
   views_count: number | null;
+  public_id: string | null;
 }
 
 const News = () => {
