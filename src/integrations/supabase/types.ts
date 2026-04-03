@@ -636,6 +636,66 @@ export type Database = {
         }
         Relationships: []
       }
+      invoices: {
+        Row: {
+          amount: number
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          invoice_number: string
+          items: Json | null
+          paid_at: string | null
+          payment_provider: string | null
+          payment_transaction_id: string | null
+          request_id: string | null
+          request_type: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_number?: string
+          items?: Json | null
+          paid_at?: string | null
+          payment_provider?: string | null
+          payment_transaction_id?: string | null
+          request_id?: string | null
+          request_type?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_number?: string
+          items?: Json | null
+          paid_at?: string | null
+          payment_provider?: string | null
+          payment_transaction_id?: string | null
+          request_id?: string | null
+          request_type?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       lexia_conversations: {
         Row: {
           created_at: string
