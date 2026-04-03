@@ -331,6 +331,10 @@ const ClientDashboard = () => {
                 </div>
               )}
             </TabsContent>
+
+            <TabsContent value="invoices" className="mt-6">
+              <ClientInvoices userId={user?.id} />
+            </TabsContent>
             
             <TabsContent value="referral" className="mt-6">
               {user && <ReferralSection userId={user.id} />}

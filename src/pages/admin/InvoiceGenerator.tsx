@@ -447,7 +447,7 @@ const InvoiceGenerator = () => {
       printWindow.print();
     }, 500);
     
-    toast.success("Facture générée avec succès!");
+    toast.success(savedInvoice ? "Facture enregistrée et envoyée au client !" : "Facture générée (non enregistrée)");
   };
 
   return (
