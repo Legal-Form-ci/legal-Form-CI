@@ -215,9 +215,53 @@ const InvoiceGenerator = () => {
     return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';
   };
 
+  const saveInvoiceToDb = async () => {
+    // Find the client to get user_id
+    const client = clients.find(c => c.id === selectedClientId);
+    if (!client) return null;
+
+    // Get user_id from the request
+    let userId: string | null = null;
+    if (client.type === 'company') {
+      const { data } = await supabase.from('company_requests').select('user_id').eq('id', client.id).maybeSingle();
+      userId = data?.user_id || null;
+    } else {
+      const { data } = await supabase.from('service_requests').select('user_id').eq('id', client.id).maybeSingle();
+      userId = data?.user_id || null;
+    }
+
+    if (!userId) {
+      toast.error("Impossible de trouver l'utilisateur lié à cette demande");
+      return null;
+    }
+
+    const { data: invoice, error } = await supabase.from('invoices').insert({
+      user_id: userId,
+      request_id: invoiceData.requestId || null,
+      request_type: invoiceData.requestType || 'company',
+      invoice_number: invoiceData.invoiceNumber,
+      amount: calculateTotal(),
+      items: items as any,
+      description: items.map(i => i.description).join(', '),
+      due_date: invoiceData.dueDate ? new Date(invoiceData.dueDate).toISOString() : null,
+      status: 'pending',
+    }).select().single();
+
+    if (error) {
+      console.error('Error saving invoice:', error);
+      toast.error("Erreur lors de l'enregistrement de la facture");
+      return null;
+    }
+
+    return invoice;
+  };
+
   const handlePrint = async () => {
     const printContent = invoiceRef.current;
     if (!printContent) return;
+
+    // Save invoice to database
+    const savedInvoice = await saveInvoiceToDb();
 
     // If linked to a request, update the estimated price
     if (invoiceData.requestId) {
@@ -227,8 +271,6 @@ const InvoiceGenerator = () => {
           .from(tableName)
           .update({ estimated_price: calculateTotal() })
           .eq('id', invoiceData.requestId);
-        
-        toast.success("Facture liée à la demande mise à jour");
       } catch (error) {
         console.error('Error updating request:', error);
       }
