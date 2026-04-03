@@ -196,6 +196,7 @@ const BlogPostPage = () => {
 
           <div className="prose prose-lg dark:prose-invert max-w-none article-content">
             <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeRaw]}
               components={{
                 h1: ({children}) => <h1 className="text-3xl font-bold text-primary mb-6 mt-8 border-b-2 border-primary/30 pb-3">{children}</h1>,

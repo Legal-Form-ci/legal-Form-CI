@@ -632,6 +632,7 @@ const NewsManagement = () => {
                       <div className="border rounded-md p-4 min-h-[400px] max-h-[500px] overflow-y-auto prose prose-sm max-w-none dark:prose-invert">
                         {formData.content ? (
                           <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
                             rehypePlugins={[rehypeRaw]}
                             components={{
                               h1: ({children}) => <h1 className="text-3xl font-bold text-primary mb-4 mt-6">{children}</h1>,
