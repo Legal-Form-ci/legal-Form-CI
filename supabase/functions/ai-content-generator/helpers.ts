@@ -22,8 +22,8 @@ export interface InlineIllustration {
 }
 
 const AI_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const TEXT_MODEL = "google/gemini-2.5-flash";
-const IMAGE_MODEL = "google/gemini-2.5-flash-image";
+const TEXT_MODEL = "google/gemini-3-flash-preview";
+const IMAGE_MODEL = "google/gemini-3.1-flash-image-preview";
 
 export class HttpError extends Error {
   status: number;
