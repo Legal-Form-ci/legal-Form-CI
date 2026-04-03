@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import { Calendar, ArrowLeft, User, Eye, Share2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
+import remarkGfm from "remark-gfm";
 import { useToast } from "@/hooks/use-toast";
 
 interface BlogPost {
