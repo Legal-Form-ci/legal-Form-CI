@@ -245,10 +245,14 @@ const ClientDashboard = () => {
 
           {/* Tabs */}
           <Tabs defaultValue="requests" className="w-full">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsList className="grid w-full max-w-lg grid-cols-3">
               <TabsTrigger value="requests" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
                 Mes demandes
+              </TabsTrigger>
+              <TabsTrigger value="invoices" className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4" />
+                Factures
               </TabsTrigger>
               <TabsTrigger value="referral" className="flex items-center gap-2">
                 <Gift className="h-4 w-4" />
