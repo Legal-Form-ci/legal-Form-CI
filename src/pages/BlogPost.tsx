@@ -203,7 +203,7 @@ const BlogPostPage = () => {
             </div>
 
             <h1 className="font-heading font-bold text-3xl md:text-4xl lg:text-5xl text-foreground mb-4 leading-tight">
-              {post.title}
+              {translatedTitle || post.title}
             </h1>
             
             {post.excerpt && <p className="text-lg text-muted-foreground italic leading-relaxed">{post.excerpt}</p>}
