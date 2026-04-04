@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { firecrawlApi } from "@/lib/api/firecrawl";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -37,10 +36,9 @@ export const HeroSearchBar = () => {
     const localResults: SearchResult[] = [];
     const searchTerm = `%${q}%`;
 
-    // Search blog posts
     const { data: blogs } = await supabase
       .from("blog_posts")
-      .select("title, slug, excerpt, content, category")
+      .select("title, slug, excerpt, content, category, public_id")
       .eq("is_published", true)
       .or(`title.ilike.${searchTerm},content.ilike.${searchTerm},excerpt.ilike.${searchTerm}`)
       .limit(5);
@@ -50,16 +48,15 @@ export const HeroSearchBar = () => {
         localResults.push({
           title: b.title,
           description: b.excerpt || b.content?.slice(0, 150),
-          url: `/blog/${b.slug}`,
+          url: `/actualites/${b.public_id || b.slug}`,
           source: "local",
         })
       );
     }
 
-    // Search news
     const { data: news } = await supabase
       .from("news")
-      .select("title, id, excerpt, content, category")
+      .select("title, id, excerpt, content, category, public_id")
       .eq("is_published", true)
       .or(`title.ilike.${searchTerm},content.ilike.${searchTerm}`)
       .limit(5);
@@ -69,13 +66,12 @@ export const HeroSearchBar = () => {
         localResults.push({
           title: n.title,
           description: n.excerpt || n.content?.slice(0, 150),
-          url: `/news`,
+          url: `/actualites`,
           source: "local",
         })
       );
     }
 
-    // Search FAQ
     const { data: faqs } = await supabase
       .from("faq")
       .select("question, answer")
@@ -103,33 +99,11 @@ export const HeroSearchBar = () => {
 
     setIsSearching(true);
     try {
-      // Search local content first
       const localResults = await searchLocalContent(q);
-
-      // Then search the web via Firecrawl
-      let webResults: SearchResult[] = [];
-      try {
-        const enhancedQuery = `${q} droit des affaires OHADA Côte d'Ivoire entreprise`;
-        const response = await firecrawlApi.search(enhancedQuery, {
-          limit: 8,
-          lang: "fr",
-          country: "ci",
-          scrapeOptions: { formats: ["markdown"] },
-        });
-
-        if (response.success && response.data) {
-          const raw = Array.isArray(response.data) ? response.data : [];
-          webResults = raw.map((r: any) => ({ ...r, source: "web" as const }));
-        }
-      } catch (err) {
-        console.warn("Web search failed, showing local results only:", err);
-      }
-
-      const allResults = [...localResults, ...webResults];
-      setResults(allResults);
+      setResults(localResults);
       setShowPopup(true);
 
-      if (allResults.length === 0) {
+      if (localResults.length === 0) {
         toast.info("Aucun résultat trouvé. Essayez avec d'autres termes.");
       }
     } catch (error) {
@@ -187,7 +161,6 @@ export const HeroSearchBar = () => {
           </div>
         </div>
 
-        {/* Quick suggestions */}
         <div className="flex flex-wrap gap-2 mt-3">
           {suggestions.map((s, i) => (
             <button
@@ -201,7 +174,6 @@ export const HeroSearchBar = () => {
         </div>
       </div>
 
-      {/* Results Popup */}
       <Dialog open={showPopup} onOpenChange={setShowPopup}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
@@ -220,7 +192,7 @@ export const HeroSearchBar = () => {
               {results.slice(0, 8).map((result, i) => (
                 <div
                   key={i}
-                  className={`p-4 rounded-lg border border-border hover:border-primary/30 transition-colors bg-card ${result.source === "local" ? "cursor-pointer" : ""}`}
+                  className="p-4 rounded-lg border border-border hover:border-primary/30 transition-colors bg-card cursor-pointer"
                   onClick={() => handleResultClick(result)}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -228,28 +200,12 @@ export const HeroSearchBar = () => {
                       {result.title || "Résultat"}
                     </h3>
                     <Badge variant="outline" className="text-[10px] flex-shrink-0">
-                      {result.source === "local" ? (
-                        <><BookOpen className="h-3 w-3 mr-1" />Site</>
-                      ) : (
-                        <><Globe className="h-3 w-3 mr-1" />Web</>
-                      )}
+                      <BookOpen className="h-3 w-3 mr-1" />Site
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                    {result.description || result.markdown?.slice(0, 150) || ""}
+                    {result.description || ""}
                   </p>
-                  {result.source === "web" && result.url && (
-                    <a
-                      href={result.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-primary hover:underline flex items-center gap-1 mt-2"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <ExternalLink className="h-3 w-3" />
-                      {(() => { try { return new URL(result.url).hostname; } catch { return result.url; } })()}
-                    </a>
-                  )}
                 </div>
               ))}
 
