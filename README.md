@@ -1,73 +1,52 @@
-# Welcome to your Lovable project
+# Legal Form - Plateforme de Création d'Entreprises en Côte d'Ivoire
 
-## Project info
+Propulsé par **IKNov** | [legalform.ci](https://www.legalform.ci)
 
-**URL**: https://lovable.dev/projects/b30f3167-fe1f-4d99-8359-541fb12cec9f
+## Présentation
 
-## How can I edit this code?
+Legal Form est la plateforme #1 de création d'entreprises en Côte d'Ivoire, couvrant toute la zone OHADA. Elle permet aux entrepreneurs de créer leur entreprise 100% en ligne : SARL, SARLU, EI, Association, ONG, GIE, SCI, Coopérative, Fondation, et Filiale étrangère.
 
-There are several ways of editing your application.
+## Stack Technique
 
-**Use Lovable**
+- **Frontend** : React 18 + TypeScript + Vite 5 + Tailwind CSS
+- **Backend** : Supabase (Auth, Database, Edge Functions, Storage)
+- **IA** : IKNov AI Gateway (Gemini) pour l'assistant LexIA, le générateur d'articles et la traduction automatique
+- **Paiement** : FedaPay (Mobile Money, Carte bancaire)
+- **Langues** : Français (défaut), Anglais, Espagnol — traduction automatique du contenu dynamique
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/b30f3167-fe1f-4d99-8359-541fb12cec9f) and start prompting.
+## Fonctionnalités
 
-Changes made via Lovable will be committed automatically to this repo.
+- Formulaire de création d'entreprise multi-étapes
+- Tableau de bord client avec suivi en temps réel
+- Tableau de bord administrateur complet
+- Système de facturation et paiement en ligne
+- Assistant IA « LexIA » pour le conseil juridique
+- Générateur d'articles IA avec images
+- Blog / Actualités avec partage social
+- Forum communautaire
+- Système de parrainage
+- FAQ dynamique
+- Traduction automatique multilingue
+- Notifications en temps réel
 
-**Use your preferred IDE**
+## Démarrage
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Variables d'environnement
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Les variables Supabase sont configurées automatiquement via `.env` :
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+- `VITE_SUPABASE_PROJECT_ID`
 
-**Use GitHub Codespaces**
+## Déploiement
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Le frontend se déploie via le bouton **Publish**. Les Edge Functions et migrations se déploient automatiquement.
 
-## What technologies are used for this project?
+## Licence
 
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/b30f3167-fe1f-4d99-8359-541fb12cec9f) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Propriétaire — IKNov © 2025-2026
