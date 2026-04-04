@@ -260,7 +260,7 @@ const BlogPostPage = () => {
                 em: ({children}) => <em className="italic">{children}</em>,
               }}
             >
-              {post.content}
+              {translatedContent || post.content}
             </ReactMarkdown>
           </div>
         </div>
