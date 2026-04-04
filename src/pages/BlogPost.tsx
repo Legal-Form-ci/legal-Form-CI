@@ -51,6 +51,29 @@ const BlogPostPage = () => {
     if (slug) loadPost();
   }, [slug]);
 
+  // Auto-translate content when language changes
+  useEffect(() => {
+    if (!post || !needsTranslation) {
+      if (post) {
+        setTranslatedTitle(post.title);
+        setTranslatedContent(post.content);
+      }
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const [title, content] = await Promise.all([
+        translateText(post.title),
+        translateText(post.content),
+      ]);
+      if (!cancelled) {
+        setTranslatedTitle(title);
+        setTranslatedContent(content);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [post, currentLang, needsTranslation]);
+
   const loadPost = async () => {
     setLoading(true);
     try {
