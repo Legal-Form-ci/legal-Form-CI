@@ -40,9 +40,12 @@ const SOCIAL_NETWORKS = [
 const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const [post, setPost] = useState<BlogPost | null>(null);
+  const [translatedContent, setTranslatedContent] = useState<string>("");
+  const [translatedTitle, setTranslatedTitle] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [shareOpen, setShareOpen] = useState(false);
   const { toast } = useToast();
+  const { currentLang, translateText, needsTranslation, formatDate } = useAutoTranslate();
 
   useEffect(() => {
     if (slug) loadPost();
