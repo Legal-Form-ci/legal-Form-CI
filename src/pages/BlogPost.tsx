@@ -11,6 +11,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import { useToast } from "@/hooks/use-toast";
+import { useAutoTranslate } from "@/hooks/useAutoTranslate";
 
 interface BlogPost {
   id: string;
@@ -39,13 +40,39 @@ const SOCIAL_NETWORKS = [
 const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const [post, setPost] = useState<BlogPost | null>(null);
+  const [translatedContent, setTranslatedContent] = useState<string>("");
+  const [translatedTitle, setTranslatedTitle] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [shareOpen, setShareOpen] = useState(false);
   const { toast } = useToast();
+  const { currentLang, translateText, needsTranslation, formatDate } = useAutoTranslate();
 
   useEffect(() => {
     if (slug) loadPost();
   }, [slug]);
+
+  // Auto-translate content when language changes
+  useEffect(() => {
+    if (!post || !needsTranslation) {
+      if (post) {
+        setTranslatedTitle(post.title);
+        setTranslatedContent(post.content);
+      }
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const [title, content] = await Promise.all([
+        translateText(post.title),
+        translateText(post.content),
+      ]);
+      if (!cancelled) {
+        setTranslatedTitle(title);
+        setTranslatedContent(content);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [post, currentLang, needsTranslation]);
 
   const loadPost = async () => {
     setLoading(true);
@@ -176,7 +203,7 @@ const BlogPostPage = () => {
             </div>
 
             <h1 className="font-heading font-bold text-3xl md:text-4xl lg:text-5xl text-foreground mb-4 leading-tight">
-              {post.title}
+              {translatedTitle || post.title}
             </h1>
             
             {post.excerpt && <p className="text-lg text-muted-foreground italic leading-relaxed">{post.excerpt}</p>}
@@ -233,7 +260,7 @@ const BlogPostPage = () => {
                 em: ({children}) => <em className="italic">{children}</em>,
               }}
             >
-              {post.content}
+              {translatedContent || post.content}
             </ReactMarkdown>
           </div>
         </div>
