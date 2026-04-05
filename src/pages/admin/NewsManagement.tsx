@@ -307,9 +307,12 @@ const NewsManagement = () => {
       .map(tag => tag.trim())
       .filter(tag => tag.length > 0);
 
+    const publicId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
     const postData = {
       title: formData.title,
       slug: formData.slug || generateSlug(formData.title),
+      public_id: publicId,
       excerpt: formData.excerpt || formData.content.substring(0, 200).replace(/[#*_`]/g, '') + '...',
       content: formData.content,
       cover_image: formData.cover_image || null,
@@ -322,9 +325,10 @@ const NewsManagement = () => {
 
     try {
       if (editingPost) {
+        const { public_id: _, ...updateData } = postData;
         const { error } = await supabase
           .from('blog_posts')
-          .update(postData)
+          .update(updateData)
           .eq('id', editingPost.id);
 
         if (error) throw error;
