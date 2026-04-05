@@ -32,12 +32,11 @@ import {
 
 interface FAQ {
   id: string;
-  category_id: string;
-  category_name: string;
   question: string;
   answer: string;
-  sort_order: number;
-  is_active: boolean;
+  category: string | null;
+  sort_order: number | null;
+  is_published: boolean | null;
   created_at: string;
 }
 

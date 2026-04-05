@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
+import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
 
 interface RichTextEditorProps {
