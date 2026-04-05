@@ -405,6 +405,7 @@ export const RichTextEditor = ({
           >
             {value ? (
               <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeRaw]}
                 components={{
                   h1: ({children}) => <h1 className="text-3xl font-bold text-primary mb-4 mt-6 border-b-2 border-primary/30 pb-2">{children}</h1>,
