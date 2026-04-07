@@ -12,7 +12,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import DashboardWelcome from "@/components/DashboardWelcome";
 import ReferralSection from "@/components/ReferralSection";
-import { LogOut, Plus, FileText, Building2, Clock, CreditCard, MessageSquare, Eye, TrendingUp, CheckCircle2, Gift } from "lucide-react";
+import { LogOut, Plus, FileText, Building2, Clock, CreditCard, MessageSquare, Eye, TrendingUp, CheckCircle2, Gift, User } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useClientRealtimeNotifications } from "@/hooks/useClientRealtimeNotifications";
 
@@ -256,6 +256,10 @@ const ClientDashboard = () => {
               <Button onClick={() => navigate("/create")} className="bg-primary hover:bg-primary/90">
                 <Plus className="mr-2 h-4 w-4" />
                 {t('dashboard.newRequest', 'Nouvelle demande')}
+              </Button>
+              <Button variant="outline" onClick={() => navigate("/client/profile")}>
+                <User className="mr-2 h-4 w-4" />
+                Mon profil
               </Button>
               <Button variant="outline" onClick={() => navigate("/client/messages")}>
                 <MessageSquare className="mr-2 h-4 w-4" />
