@@ -19,7 +19,9 @@ import { useClientRealtimeNotifications } from "@/hooks/useClientRealtimeNotific
 const ClientInvoices = ({ userId }: { userId?: string }) => {
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [payingId, setPayingId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!userId) return;
@@ -34,6 +36,28 @@ const ClientInvoices = ({ userId }: { userId?: string }) => {
     };
     fetchInvoices();
   }, [userId]);
+
+  const handlePay = async (invoice: any) => {
+    setPayingId(invoice.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-fedapay-payment', {
+        body: { invoiceId: invoice.id }
+      });
+
+      if (error) throw error;
+
+      if (data?.paymentUrl) {
+        window.location.href = data.paymentUrl;
+      } else {
+        toast({ title: "Erreur", description: "Impossible de générer le lien de paiement", variant: "destructive" });
+      }
+    } catch (err: any) {
+      console.error('Payment error:', err);
+      toast({ title: "Erreur de paiement", description: err.message || "Une erreur est survenue", variant: "destructive" });
+    } finally {
+      setPayingId(null);
+    }
+  };
 
   if (loading) return <div className="text-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" /></div>;
 
@@ -70,9 +94,12 @@ const ClientInvoices = ({ userId }: { userId?: string }) => {
               </div>
               <div className="flex gap-2">
                 {invoice.status !== 'paid' && (
-                  <Button size="sm" onClick={() => navigate(`/payment/${invoice.request_id || invoice.id}?type=${invoice.request_type || 'company'}`)}>
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    Payer
+                  <Button size="sm" onClick={() => handlePay(invoice)} disabled={payingId === invoice.id}>
+                    {payingId === invoice.id ? (
+                      <><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />Chargement...</>
+                    ) : (
+                      <><CreditCard className="mr-2 h-4 w-4" />Payer via FedaPay</>
+                    )}
                   </Button>
                 )}
                 <Button variant="outline" size="sm">
