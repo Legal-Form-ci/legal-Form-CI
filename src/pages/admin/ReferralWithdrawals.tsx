@@ -114,8 +114,7 @@ const ReferralWithdrawals = () => {
         .update({
           status: action,
           processed_at: new Date().toISOString(),
-          processed_by: user?.id,
-          admin_notes: adminNotes
+          processed_by: user?.id
         })
         .eq('id', selectedWithdrawal.id);
 

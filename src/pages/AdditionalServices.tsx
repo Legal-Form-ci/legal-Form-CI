@@ -97,9 +97,7 @@ const AdditionalServices = () => {
           contact_name: contactData.contact_name,
           contact_phone: contactData.phone,
           contact_email: contactData.email,
-          company_name: serviceDetails.company_name || null,
-          description: `Service: ${selectedServiceInfo?.label}`,
-          service_details: serviceDetails,
+          details: { company_name: serviceDetails.company_name || null, description: `Service: ${selectedServiceInfo?.label}`, ...serviceDetails },
           estimated_price: selectedServiceInfo?.price || 25000,
           status: 'pending',
         })

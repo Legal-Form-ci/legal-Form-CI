@@ -17,6 +17,7 @@ interface BlogPost {
   category: string | null;
   tags: string[] | null;
   published_at: string | null;
+  public_id: string | null;
 }
 
 const Blog = () => {
@@ -35,7 +36,7 @@ const Blog = () => {
     try {
       let query = supabase
         .from('blog_posts')
-        .select('id, title, slug, excerpt, cover_image, category, tags, published_at')
+        .select('id, title, slug, excerpt, cover_image, category, tags, published_at, public_id')
         .eq('is_published', true)
         .order('published_at', { ascending: false });
 
@@ -82,7 +83,7 @@ const Blog = () => {
           ) : posts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {posts.map((post) => (
-                <Link key={post.id} to={`/blog/${post.slug}`}>
+                <Link key={post.id} to={`/actualites/${post.public_id || post.slug}`}>
                   <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
                     {post.cover_image && <div className="aspect-video w-full overflow-hidden"><img src={post.cover_image} alt={post.title} className="w-full h-full object-cover" /></div>}
                     <CardHeader>

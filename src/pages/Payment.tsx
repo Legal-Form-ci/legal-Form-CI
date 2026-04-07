@@ -191,11 +191,12 @@ const Payment = () => {
           amount: request.estimated_price,
           currency: 'XOF',
           status: 'pending',
-          customer_email: customerEmail,
-          customer_name: customerName,
-          customer_phone: customerPhone,
-          tracking_number: request.tracking_number,
+          provider: 'fedapay',
           metadata: {
+            customer_email: customerEmail,
+            customer_name: customerName,
+            customer_phone: customerPhone,
+            tracking_number: request.tracking_number,
             description: `Paiement ${request.type === 'company' ? 'création entreprise' : 'service'} - ${request.tracking_number}`
           }
         });

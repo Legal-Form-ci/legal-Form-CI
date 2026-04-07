@@ -33,6 +33,7 @@ import IdentityDocuments from "./pages/admin/IdentityDocuments";
 import InvoiceGenerator from "./pages/admin/InvoiceGenerator";
 import AdditionalServicesAdmin from "./pages/admin/AdditionalServicesAdmin";
 import ClientDashboard from "./pages/client/Dashboard";
+import ClientProfile from "./pages/client/Profile";
 import AdditionalServices from "./pages/AdditionalServices";
 import ServiceRequest from "./pages/ServiceRequest";
 import RequestDetail from "./pages/RequestDetail";
@@ -134,6 +135,7 @@ const App = () => (
           <Route path="/admin/invoices" element={<InvoiceGenerator />} />
           <Route path="/admin/services" element={<AdditionalServicesAdmin />} />
           <Route path="/client/dashboard" element={<ClientDashboard />} />
+          <Route path="/client/profile" element={<ClientProfile />} />
           <Route path="/mon-espace" element={<ClientDashboard />} />
           <Route path="/request/:id" element={<RequestDetail />} />
           <Route path="/tracking" element={<PublicTracking />} />

@@ -28,6 +28,8 @@ interface BlogPost {
   public_id: string | null;
 }
 
+const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID || 'xwtmnzorzsvkamqemddk';
+
 const SOCIAL_NETWORKS = [
   { name: "Facebook", icon: "https://cdn.simpleicons.org/facebook/1877F2", share: (url: string, text: string) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}` },
   { name: "X (Twitter)", icon: "https://cdn.simpleicons.org/x/000000", share: (url: string, text: string) => `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}` },
@@ -118,12 +120,13 @@ const BlogPostPage = () => {
   const getArticleUrl = () => {
     if (!post) return window.location.href;
     const id = post.public_id || post.slug;
-    return `https://www.legalform.ci/actualites/${id}`;
+    // Use OG proxy edge function URL so crawlers get proper OG tags with cover image
+    return `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/og-image?id=${id}`;
   };
 
   const getShareText = () => {
     if (!post) return '';
-    return `${post.excerpt || post.title}\n\n📖 Lire l'article complet, cliquez ici :`;
+    return `${post.title}\n\n${post.excerpt || ''}\n\n📖 Lire l'article complet :`;
   };
 
   if (loading) {

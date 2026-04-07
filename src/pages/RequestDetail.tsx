@@ -64,8 +64,7 @@ const RequestDetail = () => {
         .from(tableName)
         .update({
           status: 'completed',
-          closed_at: new Date().toISOString(),
-          closed_by: user?.id,
+          updated_at: new Date().toISOString(),
         })
         .eq('id', id);
 

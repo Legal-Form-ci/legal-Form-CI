@@ -179,7 +179,6 @@ const AdminMessages = () => {
         sender_id: user.id,
         sender_role: "admin",
         message: newMessage.trim(),
-        is_admin: true,
       });
       if (error) throw error;
       setNewMessage("");
