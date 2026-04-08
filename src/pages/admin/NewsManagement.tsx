@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AIContentGenerator from "@/components/AIContentGenerator";
@@ -20,33 +20,11 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import { 
-  Plus, 
-  Edit2, 
-  Trash2, 
-  Eye, 
-  Image as ImageIcon, 
-  Save,
-  Bold,
-  Italic,
-  List,
-  Heading,
-  Heading1,
-  Heading2,
-  Heading3,
-  Link as LinkIcon,
-  Newspaper,
-  Quote,
-  Code,
-  Table as TableIcon,
-  AlignLeft,
-  AlignCenter,
-  ListOrdered,
-  Minus,
-  Palette,
-  Undo,
-  Redo,
-  ChevronLeft,
-  ChevronRight
+  Plus, Edit2, Trash2, Eye, Image as ImageIcon, Save,
+  Bold, Italic, List, Heading1, Heading2, Heading3,
+  Link as LinkIcon, Newspaper, Quote, Code, Table as TableIcon,
+  AlignCenter, ListOrdered, Minus, Palette, Undo, Redo,
+  ChevronLeft, ChevronRight
 } from "lucide-react";
 
 interface BlogPost {
@@ -63,6 +41,7 @@ interface BlogPost {
   author_name: string | null;
   views_count: number | null;
   created_at: string;
+  public_id: string | null;
 }
 
 const ITEMS_PER_PAGE = 10;
@@ -118,7 +97,6 @@ const NewsManagement = () => {
     setLoading(false);
   };
 
-  // Pagination
   const totalPages = Math.ceil(posts.length / ITEMS_PER_PAGE);
   const paginatedPosts = posts.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -143,7 +121,6 @@ const NewsManagement = () => {
   };
 
   const handleContentChange = (newContent: string) => {
-    // Save to undo stack
     setUndoStack(prev => [...prev.slice(-20), formData.content]);
     setRedoStack([]);
     setFormData(prev => ({ ...prev, content: newContent }));
@@ -193,11 +170,9 @@ const NewsManagement = () => {
         uploadedUrls.push(urlData.publicUrl);
       }
 
-      // If single image, set as cover
       if (uploadedUrls.length === 1) {
         setFormData(prev => ({ ...prev, cover_image: uploadedUrls[0] }));
       } else {
-        // Insert images into content
         const imageMarkdown = uploadedUrls.map(url => `![Image](${url})`).join('\n\n');
         handleContentChange(formData.content + '\n\n' + imageMarkdown);
         if (!formData.cover_image) {
@@ -205,13 +180,9 @@ const NewsManagement = () => {
         }
       }
 
-      toast({ title: t('admin.uploadSuccess', 'Images téléchargées avec succès') });
+      toast({ title: 'Images téléchargées avec succès' });
     } catch (error: any) {
-      toast({ 
-        title: t('admin.error', 'Erreur'), 
-        description: error.message, 
-        variant: "destructive" 
-      });
+      toast({ title: 'Erreur', description: error.message, variant: "destructive" });
     } finally {
       setUploading(false);
     }
@@ -229,60 +200,26 @@ const NewsManagement = () => {
     let cursorOffset = 0;
 
     switch (type) {
-      case 'bold':
-        newText = `**${selectedText || 'texte en gras'}**`;
-        cursorOffset = selectedText ? 0 : -2;
-        break;
-      case 'italic':
-        newText = `*${selectedText || 'texte en italique'}*`;
-        cursorOffset = selectedText ? 0 : -1;
-        break;
-      case 'h1':
-        newText = `\n# ${selectedText || 'Titre principal'}\n`;
-        break;
-      case 'h2':
-        newText = `\n## ${selectedText || 'Sous-titre'}\n`;
-        break;
-      case 'h3':
-        newText = `\n### ${selectedText || 'Section'}\n`;
-        break;
-      case 'list':
-        newText = `\n- ${selectedText || 'élément de liste'}\n- élément 2\n- élément 3`;
-        break;
-      case 'numbered':
-        newText = `\n1. ${selectedText || 'premier élément'}\n2. deuxième élément\n3. troisième élément`;
-        break;
-      case 'link':
-        newText = `[${selectedText || 'texte du lien'}](https://url.com)`;
-        break;
-      case 'quote':
-        newText = `\n> ${selectedText || 'Citation importante'}\n`;
-        break;
-      case 'code':
-        newText = selectedText.includes('\n') 
-          ? `\n\`\`\`\n${selectedText || 'code'}\n\`\`\`\n`
-          : `\`${selectedText || 'code'}\``;
-        break;
-      case 'table':
-        newText = `\n| Colonne 1 | Colonne 2 | Colonne 3 |\n|-----------|-----------|----------|\n| Données 1 | Données 2 | Données 3 |\n| Données 4 | Données 5 | Données 6 |\n`;
-        break;
-      case 'hr':
-        newText = `\n---\n`;
-        break;
-      case 'color':
-        // Color is applied via custom span (rendered in preview)
-        newText = `<span style="color:${extraData || '#008080'}">${selectedText || 'texte coloré'}</span>`;
-        break;
-      case 'center':
-        newText = `<div style="text-align:center">\n\n${selectedText || 'Texte centré'}\n\n</div>`;
-        break;
+      case 'bold': newText = `**${selectedText || 'texte en gras'}**`; cursorOffset = selectedText ? 0 : -2; break;
+      case 'italic': newText = `*${selectedText || 'texte en italique'}*`; cursorOffset = selectedText ? 0 : -1; break;
+      case 'h1': newText = `\n# ${selectedText || 'Titre principal'}\n`; break;
+      case 'h2': newText = `\n## ${selectedText || 'Sous-titre'}\n`; break;
+      case 'h3': newText = `\n### ${selectedText || 'Section'}\n`; break;
+      case 'list': newText = `\n- ${selectedText || 'élément de liste'}\n- élément 2\n- élément 3`; break;
+      case 'numbered': newText = `\n1. ${selectedText || 'premier élément'}\n2. deuxième élément\n3. troisième élément`; break;
+      case 'link': newText = `[${selectedText || 'texte du lien'}](https://url.com)`; break;
+      case 'quote': newText = `\n> ${selectedText || 'Citation importante'}\n`; break;
+      case 'code': newText = selectedText.includes('\n') ? `\n\`\`\`\n${selectedText || 'code'}\n\`\`\`\n` : `\`${selectedText || 'code'}\``; break;
+      case 'table': newText = `\n| Colonne 1 | Colonne 2 | Colonne 3 |\n|-----------|-----------|----------|\n| Données 1 | Données 2 | Données 3 |\n`; break;
+      case 'hr': newText = `\n---\n`; break;
+      case 'color': newText = `<span style="color:${extraData || '#008080'}">${selectedText || 'texte coloré'}</span>`; break;
+      case 'center': newText = `<div style="text-align:center">\n\n${selectedText || 'Texte centré'}\n\n</div>`; break;
     }
 
     const before = formData.content.substring(0, start);
     const after = formData.content.substring(end);
     handleContentChange(before + newText + after);
 
-    // Focus and set cursor position
     setTimeout(() => {
       if (textarea) {
         textarea.focus();
@@ -294,25 +231,16 @@ const NewsManagement = () => {
 
   const handleSubmit = async () => {
     if (!formData.title || !formData.content) {
-      toast({ 
-        title: t('admin.error', 'Erreur'), 
-        description: t('admin.fillRequired', 'Veuillez remplir les champs obligatoires'),
-        variant: "destructive" 
-      });
+      toast({ title: 'Erreur', description: 'Veuillez remplir les champs obligatoires', variant: "destructive" });
       return;
     }
 
-    const tagsArray = formData.tags
-      .split(',')
-      .map(tag => tag.trim())
-      .filter(tag => tag.length > 0);
+    const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
 
-    const publicId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-
-    const postData = {
+    // Don't generate public_id here - the database trigger will do it automatically
+    const postData: any = {
       title: formData.title,
       slug: formData.slug || generateSlug(formData.title),
-      public_id: publicId,
       excerpt: formData.excerpt || formData.content.substring(0, 200).replace(/[#*_`]/g, '') + '...',
       content: formData.content,
       cover_image: formData.cover_image || null,
@@ -325,32 +253,25 @@ const NewsManagement = () => {
 
     try {
       if (editingPost) {
-        const { public_id: _, ...updateData } = postData;
         const { error } = await supabase
           .from('blog_posts')
-          .update(updateData)
+          .update(postData)
           .eq('id', editingPost.id);
-
         if (error) throw error;
-        toast({ title: t('admin.articleUpdated', 'Article mis à jour') });
+        toast({ title: 'Article mis à jour' });
       } else {
         const { error } = await supabase
           .from('blog_posts')
           .insert(postData);
-
         if (error) throw error;
-        toast({ title: t('admin.articleCreated', 'Article créé') });
+        toast({ title: 'Article créé' });
       }
 
       setDialogOpen(false);
       resetForm();
       fetchPosts();
     } catch (error: any) {
-      toast({ 
-        title: t('admin.error', 'Erreur'), 
-        description: error.message, 
-        variant: "destructive" 
-      });
+      toast({ title: 'Erreur', description: error.message, variant: "destructive" });
     }
   };
 
@@ -373,51 +294,26 @@ const NewsManagement = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('admin.confirmDelete', 'Êtes-vous sûr de vouloir supprimer cet article ?'))) return;
-
-    const { error } = await supabase
-      .from('blog_posts')
-      .delete()
-      .eq('id', id);
-
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) return;
+    const { error } = await supabase.from('blog_posts').delete().eq('id', id);
     if (error) {
-      toast({ 
-        title: t('admin.error', 'Erreur'), 
-        description: error.message, 
-        variant: "destructive" 
-      });
+      toast({ title: 'Erreur', description: error.message, variant: "destructive" });
     } else {
-      toast({ title: t('admin.articleDeleted', 'Article supprimé') });
+      toast({ title: 'Article supprimé' });
       fetchPosts();
     }
   };
 
   const resetForm = () => {
     setEditingPost(null);
-    setFormData({
-      title: "",
-      slug: "",
-      excerpt: "",
-      content: "",
-      cover_image: "",
-      category: "",
-      tags: "",
-      is_published: false,
-      author_name: ""
-    });
+    setFormData({ title: "", slug: "", excerpt: "", content: "", cover_image: "", category: "", tags: "", is_published: false, author_name: "" });
     setUndoStack([]);
     setRedoStack([]);
     setEditorTab("write");
   };
 
   if (authLoading) {
-    return (
-      <AdminLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        </div>
-      </AdminLayout>
-    );
+    return <AdminLayout><div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div></AdminLayout>;
   }
 
   const colorOptions = ['#008080', '#e74c3c', '#3498db', '#27ae60', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22'];
@@ -427,309 +323,141 @@ const NewsManagement = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{t('admin.newsManagement', 'Gestion des Actualités')}</h1>
-            <p className="text-muted-foreground mt-1">{t('admin.newsDesc', 'Créez et gérez les articles d\'actualité')}</p>
+            <h1 className="text-3xl font-bold text-foreground">Gestion des Actualités</h1>
+            <p className="text-muted-foreground mt-1">Créez et gérez les articles d'actualité</p>
           </div>
           <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>
               <Button className="bg-primary hover:bg-primary/90">
-                <Plus className="mr-2 h-4 w-4" />
-                {t('admin.newArticle', 'Nouvel article')}
+                <Plus className="mr-2 h-4 w-4" />Nouvel article
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <Newspaper className="h-5 w-5 text-primary" />
-                  {editingPost ? t('admin.editArticle', 'Modifier l\'article') : t('admin.newArticle', 'Nouvel article')}
+                  {editingPost ? 'Modifier l\'article' : 'Nouvel article'}
                 </DialogTitle>
+                <DialogDescription>
+                  {editingPost ? 'Modifiez les informations de l\'article' : 'Remplissez les informations pour créer un nouvel article'}
+                </DialogDescription>
               </DialogHeader>
               
               <div className="space-y-4 py-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="title">{t('admin.title', 'Titre')} *</Label>
-                    <Input
-                      id="title"
-                      value={formData.title}
-                      onChange={(e) => handleTitleChange(e.target.value)}
-                      placeholder={t('admin.titlePlaceholder', 'Titre de l\'article')}
-                      className="text-lg font-semibold"
-                    />
+                    <Label htmlFor="title">Titre *</Label>
+                    <Input id="title" value={formData.title} onChange={(e) => handleTitleChange(e.target.value)} placeholder="Titre de l'article" className="text-lg font-semibold" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="slug">{t('admin.slug', 'Slug URL')}</Label>
-                    <Input
-                      id="slug"
-                      value={formData.slug}
-                      onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                      placeholder="titre-de-l-article"
-                    />
+                    <Label htmlFor="slug">Slug URL (référence interne)</Label>
+                    <Input id="slug" value={formData.slug} onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))} placeholder="titre-de-l-article" />
+                    <p className="text-xs text-muted-foreground">L'URL publique sera générée automatiquement au format artXXX-MM-YYY</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="category">{t('admin.category', 'Catégorie')}</Label>
-                    <Input
-                      id="category"
-                      value={formData.category}
-                      onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                      placeholder="Fiscalité, Juridique, etc."
-                    />
+                    <Label htmlFor="category">Catégorie</Label>
+                    <Input id="category" value={formData.category} onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))} placeholder="Fiscalité, Juridique, etc." />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="author">{t('admin.author', 'Auteur')}</Label>
-                    <Input
-                      id="author"
-                      value={formData.author_name}
-                      onChange={(e) => setFormData(prev => ({ ...prev, author_name: e.target.value }))}
-                      placeholder="Legal Form"
-                    />
+                    <Label htmlFor="author">Auteur</Label>
+                    <Input id="author" value={formData.author_name} onChange={(e) => setFormData(prev => ({ ...prev, author_name: e.target.value }))} placeholder="Legal Form" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="tags">{t('admin.tags', 'Tags')}</Label>
-                    <Input
-                      id="tags"
-                      value={formData.tags}
-                      onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
-                      placeholder="fiscalité, entreprise"
-                    />
+                    <Label htmlFor="tags">Tags</Label>
+                    <Input id="tags" value={formData.tags} onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))} placeholder="fiscalité, entreprise" />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="excerpt">{t('admin.excerpt', 'Résumé')}</Label>
-                  <Textarea
-                    id="excerpt"
-                    value={formData.excerpt}
-                    onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
-                    placeholder={t('admin.excerptPlaceholder', 'Bref résumé de l\'article')}
-                    rows={2}
-                  />
+                  <Label htmlFor="excerpt">Résumé</Label>
+                  <Textarea id="excerpt" value={formData.excerpt} onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))} placeholder="Résumé de l'article" rows={2} />
                 </div>
 
-                {/* Advanced Rich Text Editor */}
+                {/* Cover Image */}
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label>{t('admin.content', 'Contenu')} *</Label>
-                    <div className="flex items-center gap-2">
-                      <Button type="button" size="sm" variant="ghost" onClick={handleUndo} disabled={undoStack.length === 0}>
-                        <Undo className="h-4 w-4" />
-                      </Button>
-                      <Button type="button" size="sm" variant="ghost" onClick={handleRedo} disabled={redoStack.length === 0}>
-                        <Redo className="h-4 w-4" />
-                      </Button>
+                  <Label>Image de couverture</Label>
+                  <div className="flex gap-4 items-start">
+                    <div className="flex-1">
+                      <Input value={formData.cover_image} onChange={(e) => setFormData(prev => ({ ...prev, cover_image: e.target.value }))} placeholder="URL de l'image" />
+                    </div>
+                    <div>
+                      <Label htmlFor="image-upload" className="cursor-pointer">
+                        <div className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
+                          <ImageIcon className="h-4 w-4" />{uploading ? 'Upload...' : 'Upload'}
+                        </div>
+                      </Label>
+                      <input id="image-upload" type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} disabled={uploading} />
                     </div>
                   </div>
-                  
+                  {formData.cover_image && (
+                    <img src={formData.cover_image} alt="Couverture" className="w-full max-h-48 object-cover rounded-lg mt-2" />
+                  )}
+                </div>
+
+                {/* AI Content Generator */}
+                <AIContentGenerator onContentGenerated={(content) => handleContentChange(formData.content ? formData.content + '\n\n' + content : content)} />
+
+                {/* Markdown Editor */}
+                <div className="space-y-2">
+                  <Label>Contenu *</Label>
                   {/* Toolbar */}
-                  <div className="flex flex-wrap gap-1 p-2 border rounded-t-md bg-muted">
-                    {/* Text formatting */}
-                    <Button type="button" size="sm" variant="ghost" onClick={() => insertFormatting('bold')} title="Gras">
-                      <Bold className="h-4 w-4" />
-                    </Button>
-                    <Button type="button" size="sm" variant="ghost" onClick={() => insertFormatting('italic')} title="Italique">
-                      <Italic className="h-4 w-4" />
-                    </Button>
-                    <div className="w-px h-6 bg-border mx-1" />
-                    
-                    {/* Headings */}
-                    <Button type="button" size="sm" variant="ghost" onClick={() => insertFormatting('h1')} title="Titre H1">
-                      <Heading1 className="h-4 w-4" />
-                    </Button>
-                    <Button type="button" size="sm" variant="ghost" onClick={() => insertFormatting('h2')} title="Titre H2">
-                      <Heading2 className="h-4 w-4" />
-                    </Button>
-                    <Button type="button" size="sm" variant="ghost" onClick={() => insertFormatting('h3')} title="Titre H3">
-                      <Heading3 className="h-4 w-4" />
-                    </Button>
-                    <div className="w-px h-6 bg-border mx-1" />
-                    
-                    {/* Lists */}
-                    <Button type="button" size="sm" variant="ghost" onClick={() => insertFormatting('list')} title="Liste à puces">
-                      <List className="h-4 w-4" />
-                    </Button>
-                    <Button type="button" size="sm" variant="ghost" onClick={() => insertFormatting('numbered')} title="Liste numérotée">
-                      <ListOrdered className="h-4 w-4" />
-                    </Button>
-                    <div className="w-px h-6 bg-border mx-1" />
-                    
-                    {/* Advanced */}
-                    <Button type="button" size="sm" variant="ghost" onClick={() => insertFormatting('quote')} title="Citation">
-                      <Quote className="h-4 w-4" />
-                    </Button>
-                    <Button type="button" size="sm" variant="ghost" onClick={() => insertFormatting('code')} title="Code">
-                      <Code className="h-4 w-4" />
-                    </Button>
-                    <Button type="button" size="sm" variant="ghost" onClick={() => insertFormatting('link')} title="Lien">
-                      <LinkIcon className="h-4 w-4" />
-                    </Button>
-                    <Button type="button" size="sm" variant="ghost" onClick={() => insertFormatting('table')} title="Tableau">
-                      <TableIcon className="h-4 w-4" />
-                    </Button>
-                    <Button type="button" size="sm" variant="ghost" onClick={() => insertFormatting('hr')} title="Ligne horizontale">
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    <div className="w-px h-6 bg-border mx-1" />
-                    
-                    {/* Colors */}
-                    <div className="relative group">
-                      <Button type="button" size="sm" variant="ghost" title="Couleur du texte">
-                        <Palette className="h-4 w-4" />
-                      </Button>
-                      <div className="absolute top-full left-0 mt-1 hidden group-hover:flex gap-1 p-2 bg-popover border rounded-md shadow-lg z-50">
-                        {colorOptions.map(color => (
-                          <button
-                            key={color}
-                            type="button"
-                            onClick={() => insertFormatting('color', color)}
-                            className="w-6 h-6 rounded-full border-2 border-white shadow-sm hover:scale-110 transition-transform"
-                            style={{ backgroundColor: color }}
-                            title={color}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <Button type="button" size="sm" variant="ghost" onClick={() => insertFormatting('center')} title="Centrer">
-                      <AlignCenter className="h-4 w-4" />
-                    </Button>
-                    
-                    <div className="flex-1" />
-                    
-                    {/* Image upload */}
-                    <Label htmlFor="imageUpload" className="cursor-pointer">
-                      <Button type="button" size="sm" variant="outline" asChild disabled={uploading}>
-                        <span>
-                          <ImageIcon className="h-4 w-4 mr-1" />
-                          {uploading ? 'Upload...' : 'Images'}
-                        </span>
-                      </Button>
-                    </Label>
-                    <input
-                      id="imageUpload"
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      className="hidden"
-                      onChange={handleImageUpload}
-                    />
+                  <div className="flex flex-wrap gap-1 p-2 bg-muted rounded-t-lg border border-b-0">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleUndo} title="Annuler"><Undo className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleRedo} title="Rétablir"><Redo className="h-4 w-4" /></Button>
+                    <div className="w-px bg-border mx-1" />
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => insertFormatting('h1')} title="Titre 1"><Heading1 className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => insertFormatting('h2')} title="Titre 2"><Heading2 className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => insertFormatting('h3')} title="Titre 3"><Heading3 className="h-4 w-4" /></Button>
+                    <div className="w-px bg-border mx-1" />
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => insertFormatting('bold')} title="Gras"><Bold className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => insertFormatting('italic')} title="Italique"><Italic className="h-4 w-4" /></Button>
+                    <div className="w-px bg-border mx-1" />
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => insertFormatting('list')} title="Liste"><List className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => insertFormatting('numbered')} title="Liste numérotée"><ListOrdered className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => insertFormatting('link')} title="Lien"><LinkIcon className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => insertFormatting('quote')} title="Citation"><Quote className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => insertFormatting('code')} title="Code"><Code className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => insertFormatting('table')} title="Tableau"><TableIcon className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => insertFormatting('hr')} title="Séparateur"><Minus className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => insertFormatting('center')} title="Centrer"><AlignCenter className="h-4 w-4" /></Button>
+                    <div className="w-px bg-border mx-1" />
+                    {colorOptions.map(color => (
+                      <button key={color} onClick={() => insertFormatting('color', color)} className="h-6 w-6 rounded-full border-2 border-background shadow-sm" style={{ backgroundColor: color }} title={`Couleur ${color}`} />
+                    ))}
                   </div>
-                  
-                  {/* Editor with tabs */}
+
                   <Tabs value={editorTab} onValueChange={(v) => setEditorTab(v as "write" | "preview")}>
-                    <TabsList className="w-full justify-start">
-                      <TabsTrigger value="write">Écrire</TabsTrigger>
-                      <TabsTrigger value="preview">Aperçu</TabsTrigger>
+                    <TabsList className="w-full">
+                      <TabsTrigger value="write" className="flex-1">Écrire</TabsTrigger>
+                      <TabsTrigger value="preview" className="flex-1">Aperçu</TabsTrigger>
                     </TabsList>
-                    <TabsContent value="write" className="mt-0">
-                      <Textarea
-                        ref={contentRef}
-                        value={formData.content}
-                        onChange={(e) => handleContentChange(e.target.value)}
-                        placeholder="Rédigez votre article ici... (mise en forme visuelle, aucun HTML affiché)"
-                        rows={16}
-                        className="rounded-t-none font-mono text-sm min-h-[400px]"
-                      />
+                    <TabsContent value="write">
+                      <Textarea ref={contentRef} value={formData.content} onChange={(e) => handleContentChange(e.target.value)} placeholder="Écrivez votre article en Markdown..." rows={20} className="font-mono text-sm" />
                     </TabsContent>
-                    <TabsContent value="preview" className="mt-0">
-                      <div className="border rounded-md p-4 min-h-[400px] max-h-[500px] overflow-y-auto prose prose-sm max-w-none dark:prose-invert">
-                        {formData.content ? (
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm]}
-                            rehypePlugins={[rehypeRaw]}
-                            components={{
-                              h1: ({children}) => <h1 className="text-3xl font-bold text-primary mb-4 mt-6">{children}</h1>,
-                              h2: ({children}) => <h2 className="text-2xl font-semibold text-foreground mb-3 mt-5 pb-2 border-b border-border">{children}</h2>,
-                              h3: ({children}) => <h3 className="text-xl font-medium text-foreground mb-2 mt-4">{children}</h3>,
-                              p: ({children}) => <p className="mb-4 leading-relaxed text-foreground/90">{children}</p>,
-                              ul: ({children}) => <ul className="list-disc list-inside mb-4 space-y-1">{children}</ul>,
-                              ol: ({children}) => <ol className="list-decimal list-inside mb-4 space-y-1">{children}</ol>,
-                              blockquote: ({children}) => <blockquote className="border-l-4 border-primary pl-4 italic my-4 bg-muted/50 py-2 rounded-r">{children}</blockquote>,
-                              table: ({children}) => <div className="overflow-x-auto my-6 rounded-lg border border-border"><table className="w-full border-collapse">{children}</table></div>,
-                              thead: ({children}) => <thead className="bg-primary text-primary-foreground">{children}</thead>,
-                              th: ({children}) => <th className="px-4 py-3 text-left text-sm font-bold">{children}</th>,
-                              td: ({children}) => <td className="px-4 py-3 border-t border-border text-sm">{children}</td>,
-                              tr: ({children, ...props}) => {
-                                const node = props.node as any;
-                                const parent = node?.parentNode;
-                                const isBody = parent?.tagName === 'tbody';
-                                const idx = isBody ? Array.from(parent?.children || []).indexOf(node) : -1;
-                                return <tr className={isBody && idx % 2 === 1 ? 'bg-muted/50' : ''}>{children}</tr>;
-                              },
-                              code: ({children, className}) => className ? (
-                                <pre className="bg-muted p-3 rounded-md overflow-x-auto my-4"><code className="text-sm">{children}</code></pre>
-                              ) : (
-                                <code className="bg-muted px-1 py-0.5 rounded text-sm">{children}</code>
-                              ),
-                              hr: () => <hr className="my-6 border-t-2 border-muted" />,
-                              a: ({href, children}) => <a href={href} className="text-primary underline hover:text-primary/80" target="_blank" rel="noopener noreferrer">{children}</a>,
-                              img: ({src, alt}) => <img src={src} alt={alt || ''} className="max-w-full h-auto rounded-lg my-4 shadow-sm" />,
-                            }}
-                          >
-                            {formData.content}
-                          </ReactMarkdown>
-                        ) : (
-                          <p className="text-muted-foreground">L'aperçu apparaîtra ici...</p>
-                        )}
+                    <TabsContent value="preview">
+                      <div className="prose prose-sm dark:prose-invert max-w-none p-4 border rounded-md min-h-[400px] bg-card">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{formData.content || '*Aucun contenu*'}</ReactMarkdown>
                       </div>
                     </TabsContent>
                   </Tabs>
                 </div>
 
-                {/* AI Content Generator */}
-                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-primary/10 to-accent/10 rounded-md border-2 border-dashed border-primary/30">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium flex items-center gap-2">
-                      ✨ Génération IA avancée
-                    </p>
-                    <p className="text-xs text-muted-foreground">Écrivez même un simple mot, puis cliquez sur Générer pour créer un article complet</p>
+                {/* Publish toggle */}
+                <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                  <div>
+                    <Label>Publier l'article</Label>
+                    <p className="text-sm text-muted-foreground">L'article sera visible publiquement</p>
                   </div>
-                  <AIContentGenerator
-                    content={formData.content}
-                    onGenerate={(generated) => {
-                      setFormData(prev => ({
-                        ...prev,
-                        title: generated.title || prev.title,
-                        excerpt: generated.excerpt || prev.excerpt,
-                        category: generated.category || prev.category,
-                        content: generated.formattedContent || prev.content,
-                        slug: generated.slug || generateSlug(generated.title || prev.title),
-                        tags: generated.tags || prev.tags,
-                        author_name: generated.author_name || prev.author_name,
-                        cover_image: generated.cover_image || prev.cover_image,
-                      }));
-                    }}
-                  />
+                  <Switch checked={formData.is_published} onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_published: checked }))} />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="cover">{t('admin.coverImage', 'Image de couverture')}</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="cover"
-                      value={formData.cover_image}
-                      onChange={(e) => setFormData(prev => ({ ...prev, cover_image: e.target.value }))}
-                      placeholder="https://..."
-                      className="flex-1"
-                    />
-                  </div>
-                  {formData.cover_image && (
-                    <img src={formData.cover_image} alt="Cover preview" className="h-32 object-cover rounded-md" />
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-muted rounded-md">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={formData.is_published}
-                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_published: checked }))}
-                    />
-                    <Label>Publier immédiatement</Label>
-                  </div>
+                <div className="flex gap-3 justify-end">
+                  <Button variant="outline" onClick={() => { setDialogOpen(false); resetForm(); }}>Annuler</Button>
                   <Button onClick={handleSubmit} className="bg-primary hover:bg-primary/90">
-                    <Save className="mr-2 h-4 w-4" />
-                    {editingPost ? 'Mettre à jour' : 'Enregistrer'}
+                    <Save className="mr-2 h-4 w-4" />{editingPost ? 'Mettre à jour' : 'Créer l\'article'}
                   </Button>
                 </div>
               </div>
@@ -737,141 +465,73 @@ const NewsManagement = () => {
           </Dialog>
         </div>
 
-        {/* Statistics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-muted-foreground text-sm">Total articles</p>
-              <p className="text-2xl font-bold text-foreground">{posts.length}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-muted-foreground text-sm">Publiés</p>
-              <p className="text-2xl font-bold text-primary">{posts.filter(p => p.is_published).length}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-muted-foreground text-sm">Brouillons</p>
-              <p className="text-2xl font-bold text-accent">{posts.filter(p => !p.is_published).length}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-muted-foreground text-sm">Vues totales</p>
-              <p className="text-2xl font-bold text-primary">{posts.reduce((acc, p) => acc + (p.views_count || 0), 0)}</p>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Articles Table */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-foreground flex items-center justify-between">
-              <span>Articles ({posts.length})</span>
-              {totalPages > 1 && (
-                <div className="flex items-center gap-2 text-sm font-normal">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <span className="text-muted-foreground">
-                    Page {currentPage} / {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </CardTitle>
+            <CardTitle>Articles ({posts.length})</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Image</TableHead>
-                  <TableHead>Titre</TableHead>
-                  <TableHead>Catégorie</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Vues</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                      Chargement...
-                    </TableCell>
-                  </TableRow>
-                ) : paginatedPosts.length === 0 ? (
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                      Aucun article
-                    </TableCell>
+                    <TableHead>ID Public</TableHead>
+                    <TableHead>Titre</TableHead>
+                    <TableHead>Catégorie</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Vues</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                ) : (
-                  paginatedPosts.map((post) => (
+                </TableHeader>
+                <TableBody>
+                  {paginatedPosts.map(post => (
                     <TableRow key={post.id}>
-                      <TableCell>
-                        {post.cover_image ? (
-                          <img src={post.cover_image} alt="" className="w-12 h-12 object-cover rounded" />
-                        ) : (
-                          <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
-                            <Newspaper className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                        )}
+                      <TableCell className="font-mono text-xs">{post.public_id || '—'}</TableCell>
+                      <TableCell className="max-w-[300px]">
+                        <div className="font-medium truncate">{post.title}</div>
                       </TableCell>
-                      <TableCell className="text-foreground font-medium max-w-[200px] truncate">
-                        {post.title}
-                      </TableCell>
+                      <TableCell>{post.category && <Badge variant="outline">{post.category}</Badge>}</TableCell>
                       <TableCell>
-                        {post.category && (
-                          <Badge variant="secondary" className="bg-primary/20 text-primary">
-                            {post.category}
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={post.is_published ? "default" : "secondary"} className={post.is_published ? "bg-primary" : "bg-accent text-accent-foreground"}>
-                          {post.is_published ? "Publié" : "Brouillon"}
+                        <Badge className={post.is_published ? 'bg-green-500' : 'bg-yellow-500'}>
+                          {post.is_published ? 'Publié' : 'Brouillon'}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{post.views_count || 0}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {new Date(post.created_at).toLocaleDateString('fr-FR')}
-                      </TableCell>
+                      <TableCell>{post.views_count || 0}</TableCell>
+                      <TableCell>{new Date(post.created_at).toLocaleDateString('fr-FR')}</TableCell>
                       <TableCell>
-                        <div className="flex gap-2">
-                          <Button size="icon" variant="ghost" onClick={() => handleEdit(post)}>
-                            <Edit2 className="h-4 w-4 text-primary" />
+                        <div className="flex gap-1">
+                          {post.is_published && post.public_id && (
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => window.open(`/actualites/${post.public_id}`, '_blank')}>
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(post)}>
+                            <Edit2 className="h-4 w-4" />
                           </Button>
-                          <Button size="icon" variant="ghost" asChild>
-                            <a href={`/blog/${post.slug}`} target="_blank" rel="noopener noreferrer">
-                              <Eye className="h-4 w-4 text-primary" />
-                            </a>
-                          </Button>
-                          <Button size="icon" variant="ghost" onClick={() => handleDelete(post.id)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(post.id)}>
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 p-4">
+                <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-sm text-muted-foreground">Page {currentPage} / {totalPages}</span>
+                <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Calendar, ArrowLeft, User, Eye, Share2 } from "lucide-react";
@@ -28,8 +28,6 @@ interface BlogPost {
   public_id: string | null;
 }
 
-const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID || 'xwtmnzorzsvkamqemddk';
-
 const SOCIAL_NETWORKS = [
   { name: "Facebook", icon: "https://cdn.simpleicons.org/facebook/1877F2", share: (url: string, text: string) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}` },
   { name: "X (Twitter)", icon: "https://cdn.simpleicons.org/x/000000", share: (url: string, text: string) => `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}` },
@@ -39,6 +37,8 @@ const SOCIAL_NETWORKS = [
   { name: "Email", icon: "https://cdn.simpleicons.org/gmail/EA4335", share: (url: string, text: string) => `mailto:?subject=${encodeURIComponent(text)}&body=${encodeURIComponent('Lire l\'article complet, cliquez ici : ' + url)}` },
 ];
 
+const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID || 'xwtmnzorzsvkamqemddk';
+
 const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const [post, setPost] = useState<BlogPost | null>(null);
@@ -47,13 +47,12 @@ const BlogPostPage = () => {
   const [loading, setLoading] = useState(true);
   const [shareOpen, setShareOpen] = useState(false);
   const { toast } = useToast();
-  const { currentLang, translateText, needsTranslation, formatDate } = useAutoTranslate();
+  const { currentLang, translateText, needsTranslation } = useAutoTranslate();
 
   useEffect(() => {
     if (slug) loadPost();
   }, [slug]);
 
-  // Auto-translate content when language changes
   useEffect(() => {
     if (!post || !needsTranslation) {
       if (post) {
@@ -79,11 +78,11 @@ const BlogPostPage = () => {
   const loadPost = async () => {
     setLoading(true);
     try {
-      // Try by slug first, then by public_id
-      let { data, error } = await supabase
+      // Try by public_id first (new format artXXX-MM-YYY), then slug
+      let { data } = await supabase
         .from('blog_posts')
         .select('*')
-        .eq('slug', slug)
+        .eq('public_id', slug)
         .eq('is_published', true)
         .maybeSingle();
 
@@ -91,7 +90,7 @@ const BlogPostPage = () => {
         const res = await supabase
           .from('blog_posts')
           .select('*')
-          .eq('public_id', slug)
+          .eq('slug', slug)
           .eq('is_published', true)
           .maybeSingle();
         data = res.data;
@@ -102,13 +101,23 @@ const BlogPostPage = () => {
         supabase.rpc('increment_blog_views', { post_id: data.id }).then(() => {});
         document.title = `${data.title} | Legal Form`;
         
-        // Set OG meta tags for this specific article
-        const metaOgTitle = document.querySelector('meta[property="og:title"]');
-        const metaOgDesc = document.querySelector('meta[property="og:description"]');
-        const metaOgImage = document.querySelector('meta[property="og:image"]');
-        if (metaOgTitle) metaOgTitle.setAttribute('content', data.title);
-        if (metaOgDesc && data.excerpt) metaOgDesc.setAttribute('content', data.excerpt);
-        if (metaOgImage && data.cover_image) metaOgImage.setAttribute('content', data.cover_image);
+        // Set OG meta tags dynamically for this article
+        const setMeta = (selector: string, content: string) => {
+          const el = document.querySelector(selector);
+          if (el) el.setAttribute('content', content);
+        };
+        setMeta('meta[property="og:title"]', data.title);
+        setMeta('meta[name="twitter:title"]', data.title);
+        if (data.excerpt) {
+          setMeta('meta[property="og:description"]', data.excerpt);
+          setMeta('meta[name="twitter:description"]', data.excerpt);
+        }
+        if (data.cover_image) {
+          setMeta('meta[property="og:image"]', data.cover_image);
+          setMeta('meta[name="twitter:image"]', data.cover_image);
+        }
+        const articleUrl = `https://www.legalform.ci/actualites/${data.public_id || data.slug}`;
+        setMeta('meta[property="og:url"]', articleUrl);
       }
     } catch (error) {
       console.error('Error loading post:', error);
@@ -117,11 +126,16 @@ const BlogPostPage = () => {
     }
   };
 
-  const getArticleUrl = () => {
+  const getShareUrl = () => {
     if (!post) return window.location.href;
     const id = post.public_id || post.slug;
-    // Use OG proxy edge function URL so crawlers get proper OG tags with cover image
+    // Use og-image edge function URL so crawlers get proper OG tags with cover image
     return `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/og-image?id=${id}`;
+  };
+
+  const getArticleUrl = () => {
+    if (!post) return window.location.href;
+    return `https://www.legalform.ci/actualites/${post.public_id || post.slug}`;
   };
 
   const getShareText = () => {
@@ -246,10 +260,7 @@ const BlogPostPage = () => {
                 ),
                 thead: ({children}) => <thead className="bg-primary text-primary-foreground">{children}</thead>,
                 th: ({children}) => <th className="p-3 font-semibold text-left text-sm">{children}</th>,
-                tr: ({children, ...props}) => {
-                  // @ts-ignore
-                  return <tr className="border-b border-border even:bg-muted/50">{children}</tr>;
-                },
+                tr: ({children}) => <tr className="border-b border-border even:bg-muted/50">{children}</tr>,
                 td: ({children}) => <td className="p-3 text-sm">{children}</td>,
                 code: ({children, className}) => className ? (
                   <pre className="bg-muted p-4 rounded-lg overflow-x-auto my-5"><code className="text-sm font-mono">{children}</code></pre>
@@ -274,12 +285,13 @@ const BlogPostPage = () => {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Partager cet article</DialogTitle>
+            <DialogDescription>Choisissez un réseau social pour partager l'article</DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-3 gap-4 py-4">
             {SOCIAL_NETWORKS.map((network) => (
               <a
                 key={network.name}
-                href={network.share(getArticleUrl(), getShareText())}
+                href={network.share(getShareUrl(), getShareText())}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer"
