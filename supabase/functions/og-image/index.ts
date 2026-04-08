@@ -13,7 +13,7 @@ const handler = async (req: Request): Promise<Response> => {
   const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  // Try public_id first, then slug
+  // Try public_id first (artXXX-MM-YYY format), then slug
   let { data: post } = await supabase
     .from("blog_posts")
     .select("title, excerpt, cover_image, slug, public_id")
@@ -32,7 +32,6 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   if (!post) {
-    // Redirect to main site
     return Response.redirect("https://www.legalform.ci/actualites", 302);
   }
 
@@ -40,7 +39,9 @@ const handler = async (req: Request): Promise<Response> => {
   const articleUrl = `${siteUrl}/actualites/${post.public_id || post.slug}`;
   const title = escapeHtml(post.title);
   const description = escapeHtml(post.excerpt || post.title);
-  const image = post.cover_image || `${siteUrl}/src/assets/logo.png`;
+  
+  // CRITICAL: Always use the article's cover image, NEVER fall back to site logo
+  const image = post.cover_image || `${siteUrl}/placeholder.svg`;
 
   // Check User-Agent: if it's a social crawler, serve HTML with OG tags
   const ua = (req.headers.get("user-agent") || "").toLowerCase();

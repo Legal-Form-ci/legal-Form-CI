@@ -3,35 +3,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useRealtimeNotifications } from "@/hooks/useRealtimeNotifications";
 import { 
-  LayoutDashboard, 
-  Users, 
-  Building2, 
-  FileText, 
-  MessageSquare, 
-  Settings, 
-  CreditCard, 
-  Star, 
-  LogOut,
-  Menu,
-  X,
-  ChevronDown,
-  ChevronRight,
-  BarChart3,
-  Briefcase,
-  Newspaper,
-  Database,
-  Sun,
-  Moon,
-  Shield,
-  Wallet,
-  BookOpen,
-  HelpCircle,
-  MessagesSquare,
-  Contact,
-  Trophy,
-  UserCog,
-  Receipt,
-  IdCard
+  LayoutDashboard, Users, Building2, FileText, MessageSquare, Settings, CreditCard,
+  Star, LogOut, Menu, X, ChevronDown, ChevronRight, BarChart3, Briefcase, Newspaper,
+  Database, Sun, Moon, Shield, Wallet, BookOpen, HelpCircle, MessagesSquare, Contact,
+  Trophy, UserCog, Receipt, IdCard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,28 +32,20 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const getInitialDarkMode = () => {
-    if (typeof window === "undefined") return false;
-
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") return true;
-    if (savedTheme === "light") return false;
-
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  // Admin dark mode is stored separately from public site
+  const getInitialAdminDarkMode = () => {
+    if (typeof window === "undefined") return true;
+    const saved = localStorage.getItem("admin-theme");
+    if (saved === "light") return false;
+    return true; // Default dark for admin
   };
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
-  const [isDarkMode, setIsDarkMode] = useState(getInitialDarkMode);
+  const [isDarkMode, setIsDarkMode] = useState(getInitialAdminDarkMode);
 
-  const {
-    notifications,
-    unreadCount,
-    markAsRead,
-    markAllAsRead,
-    clearNotifications
-  } = useRealtimeNotifications(userRole === 'admin');
+  const { notifications, unreadCount, markAsRead, markAllAsRead, clearNotifications } = useRealtimeNotifications(userRole === 'admin');
 
   useEffect(() => {
     if (loading) return;
@@ -91,22 +58,20 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
     }
   }, [user, userRole, loading, navigate]);
 
+  // Apply admin theme ONLY to admin scope, restore public theme on unmount
   useEffect(() => {
-    const applyTheme = (darkMode: boolean) => {
-      document.documentElement.classList.toggle("dark", darkMode);
-      localStorage.setItem("theme", darkMode ? "dark" : "light");
+    // Save current public theme
+    const publicTheme = localStorage.getItem("theme");
+    
+    // Apply admin theme
+    document.documentElement.classList.toggle("dark", isDarkMode);
+    localStorage.setItem("admin-theme", isDarkMode ? "dark" : "light");
+
+    return () => {
+      // Restore public theme when leaving admin
+      const shouldBeDark = publicTheme === "dark";
+      document.documentElement.classList.toggle("dark", shouldBeDark);
     };
-
-    applyTheme(isDarkMode);
-
-    const onStorage = (event: StorageEvent) => {
-      if (event.key === "theme" && event.newValue) {
-        setIsDarkMode(event.newValue === "dark");
-      }
-    };
-
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
   }, [isDarkMode]);
 
   // Auto-open group containing active route
@@ -228,7 +193,6 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
         "fixed left-0 top-0 h-full bg-card border-r border-border transition-all duration-300 z-40 hidden lg:flex flex-col",
         sidebarOpen ? "w-64" : "w-16"
       )}>
-        {/* Logo */}
         <div className="p-3 border-b border-border flex items-center gap-3">
           <img src={logo} alt="Legal Form" className="h-9 w-9 flex-shrink-0" />
           {sidebarOpen && (
@@ -239,7 +203,6 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
           )}
         </div>
 
-        {/* Navigation with groups */}
         <nav className="flex-1 py-2 px-2 space-y-1 overflow-y-auto scrollbar-thin">
           {sidebarOpen ? (
             navGroups.map((group) => {
@@ -268,7 +231,6 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
               );
             })
           ) : (
-            // Collapsed: show only icons
             navGroups.flatMap(g => g.items).map((item) => {
               const Icon = item.icon;
               return (
@@ -290,7 +252,6 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
           )}
         </nav>
 
-        {/* Bottom actions */}
         <div className="p-2 border-t border-border space-y-1">
           {sidebarOpen && (
             <div className="flex justify-center mb-1">
@@ -303,27 +264,16 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
               />
             </div>
           )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleTheme}
-            className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted h-9"
-          >
+          <Button variant="ghost" size="sm" onClick={toggleTheme} className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted h-9">
             {isDarkMode ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
             {sidebarOpen && (isDarkMode ? "Mode clair" : "Mode sombre")}
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={signOut}
-            className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted h-9"
-          >
+          <Button variant="ghost" size="sm" onClick={signOut} className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted h-9">
             <LogOut className="h-4 w-4 mr-2" />
             {sidebarOpen && "Déconnexion"}
           </Button>
         </div>
 
-        {/* Collapse Toggle */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="absolute -right-3 top-20 bg-card border border-border rounded-full p-1 hover:bg-accent transition-colors shadow-sm"
@@ -342,13 +292,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleTheme}>
             {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
-          <NotificationPanel
-            notifications={notifications}
-            unreadCount={unreadCount}
-            onMarkAsRead={markAsRead}
-            onMarkAllAsRead={markAllAsRead}
-            onClear={clearNotifications}
-          />
+          <NotificationPanel notifications={notifications} unreadCount={unreadCount} onMarkAsRead={markAsRead} onMarkAllAsRead={markAllAsRead} onClear={clearNotifications} />
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2">
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -364,10 +308,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
               const isOpen = openGroups[group.label] ?? false;
               return (
                 <div key={group.label}>
-                  <button
-                    onClick={() => toggleGroup(group.label)}
-                    className="w-full flex items-center gap-2 px-3 py-2.5 rounded-md text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-                  >
+                  <button onClick={() => toggleGroup(group.label)} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-md text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     <GroupIcon className="h-4 w-4" />
                     <span className="flex-1 text-left">{group.label}</span>
                     <ChevronRight className={cn("h-3 w-3 transition-transform", isOpen && "rotate-90")} />
@@ -381,14 +322,8 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
               );
             })}
             <div className="pt-3 border-t border-border mt-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={signOut}
-                className="w-full justify-start text-muted-foreground hover:text-foreground"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Déconnexion
+              <Button variant="ghost" size="sm" onClick={signOut} className="w-full justify-start text-muted-foreground hover:text-foreground">
+                <LogOut className="h-4 w-4 mr-2" />Déconnexion
               </Button>
             </div>
           </nav>

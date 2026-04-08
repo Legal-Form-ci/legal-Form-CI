@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Search, Loader2, X, ExternalLink, ChevronRight, BookOpen, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -16,6 +16,19 @@ interface SearchResult {
   markdown?: string;
   source?: "local" | "web";
 }
+
+// Static pages to search through
+const STATIC_PAGES = [
+  { title: "Création d'entreprise", description: "Créez votre SARL, SARLU, SAS, SASU, ONG, Association en Côte d'Ivoire. Service complet de formalisation.", url: "/creer", keywords: "création entreprise sarl sarlu sas sasu ong association formalisation immatriculation rccm" },
+  { title: "Services additionnels", description: "DFE, NCC, CNPS, modifications statutaires et autres services juridiques et administratifs.", url: "/services/additional", keywords: "dfe ncc cnps modification statutaire service juridique administratif" },
+  { title: "Tarifs", description: "Découvrez nos tarifs pour la création d'entreprise. Abidjan: 180 000 FCFA, Intérieur: à partir de 150 000 FCFA.", url: "/tarifs", keywords: "tarif prix coût création entreprise abidjan intérieur" },
+  { title: "À propos de Legal Form", description: "Legal Form accompagne les entrepreneurs dans la création et la gestion de leur entreprise en Côte d'Ivoire.", url: "/about", keywords: "à propos legal form entreprise côte d'ivoire accompagnement" },
+  { title: "Contact", description: "Contactez Legal Form pour toute question sur la création d'entreprise ou nos services.", url: "/contact", keywords: "contact téléphone email adresse grand-bassam" },
+  { title: "Forum", description: "Échangez avec d'autres entrepreneurs sur le forum Legal Form.", url: "/forum", keywords: "forum discussion entrepreneur communauté" },
+  { title: "FAQ - Questions fréquentes", description: "Trouvez les réponses aux questions les plus fréquentes sur la création d'entreprise.", url: "/faq", keywords: "faq question fréquente réponse aide" },
+  { title: "Suivi de dossier", description: "Suivez l'avancement de votre dossier de création d'entreprise.", url: "/suivi", keywords: "suivi dossier tracking avancement état" },
+  { title: "Régions", description: "Créez votre entreprise partout en Côte d'Ivoire : Abidjan, Grand-Bassam, Bouaké, et toutes les régions.", url: "/regions", keywords: "région abidjan grand-bassam bouaké yamoussoukro intérieur" },
+];
 
 export const HeroSearchBar = () => {
   const { t } = useTranslation();
@@ -32,10 +45,24 @@ export const HeroSearchBar = () => {
     "Formalités création entreprise individuelle",
   ];
 
+  const searchStaticPages = (q: string): SearchResult[] => {
+    const terms = q.toLowerCase().split(/\s+/).filter(t => t.length > 2);
+    return STATIC_PAGES.filter(page => {
+      const searchable = `${page.title} ${page.description} ${page.keywords}`.toLowerCase();
+      return terms.some(term => searchable.includes(term));
+    }).map(page => ({
+      title: page.title,
+      description: page.description,
+      url: page.url,
+      source: "local" as const,
+    }));
+  };
+
   const searchLocalContent = async (q: string): Promise<SearchResult[]> => {
     const localResults: SearchResult[] = [];
     const searchTerm = `%${q}%`;
 
+    // Search blog posts
     const { data: blogs } = await supabase
       .from("blog_posts")
       .select("title, slug, excerpt, content, category, public_id")
@@ -54,6 +81,7 @@ export const HeroSearchBar = () => {
       );
     }
 
+    // Search news
     const { data: news } = await supabase
       .from("news")
       .select("title, id, excerpt, content, category, public_id")
@@ -72,6 +100,7 @@ export const HeroSearchBar = () => {
       );
     }
 
+    // Search FAQ
     const { data: faqs } = await supabase
       .from("faq")
       .select("question, answer")
@@ -99,11 +128,26 @@ export const HeroSearchBar = () => {
 
     setIsSearching(true);
     try {
-      const localResults = await searchLocalContent(q);
-      setResults(localResults);
+      // Search static pages + database content in parallel
+      const [staticResults, dbResults] = await Promise.all([
+        Promise.resolve(searchStaticPages(q)),
+        searchLocalContent(q),
+      ]);
+
+      // Merge and deduplicate
+      const allResults = [...staticResults, ...dbResults];
+      const seen = new Set<string>();
+      const uniqueResults = allResults.filter(r => {
+        const key = r.url || r.title || '';
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+      setResults(uniqueResults);
       setShowPopup(true);
 
-      if (localResults.length === 0) {
+      if (uniqueResults.length === 0) {
         toast.info("Aucun résultat trouvé. Essayez avec d'autres termes.");
       }
     } catch (error) {
@@ -122,7 +166,7 @@ export const HeroSearchBar = () => {
   };
 
   const handleResultClick = (result: SearchResult) => {
-    if (result.source === "local" && result.url) {
+    if (result.url) {
       setShowPopup(false);
       navigate(result.url);
     }
@@ -181,6 +225,7 @@ export const HeroSearchBar = () => {
               <Search className="h-5 w-5 text-primary" />
               Résultats pour "{query}"
             </DialogTitle>
+            <DialogDescription>{results.length} résultat(s) trouvé(s)</DialogDescription>
           </DialogHeader>
 
           {results.length === 0 ? (
