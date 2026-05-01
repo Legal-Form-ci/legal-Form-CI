@@ -398,7 +398,22 @@ const NewsManagement = () => {
                 </div>
 
                 {/* AI Content Generator */}
-                <AIContentGenerator onContentGenerated={(content) => handleContentChange(formData.content ? formData.content + '\n\n' + content : content)} />
+                <AIContentGenerator
+                  content={formData.content}
+                  onGenerate={(generated) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      title: generated.title || prev.title,
+                      excerpt: generated.excerpt || prev.excerpt,
+                      category: generated.category || prev.category,
+                      tags: generated.tags || prev.tags,
+                      content: generated.formattedContent || prev.content,
+                      cover_image: generated.cover_image || prev.cover_image,
+                      author_name: generated.author_name || prev.author_name,
+                      slug: generated.slug || prev.slug,
+                    }));
+                  }}
+                />
 
                 {/* Markdown Editor */}
                 <div className="space-y-2">
