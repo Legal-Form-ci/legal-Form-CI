@@ -54,6 +54,7 @@ import Payment from "./pages/Payment";
 import FAQ from "./pages/FAQ";
 import News from "./pages/News";
 import NewsManagement from "./pages/admin/NewsManagement";
+import NewsletterAdmin from "./pages/admin/NewsletterAdmin";
 import DatabaseManager from "./pages/admin/DatabaseManager";
 import ReferralWithdrawals from "./pages/admin/ReferralWithdrawals";
 import ForumManagement from "./pages/admin/ForumManagement";
@@ -154,6 +155,7 @@ const App = () => (
           <Route path="/actualites/:slug" element={<BlogPost />} />
           <Route path="/news" element={<News />} />
           <Route path="/admin/news" element={<NewsManagement />} />
+          <Route path="/admin/newsletter" element={<NewsletterAdmin />} />
           <Route path="/admin/database" element={<DatabaseManager />} />
           <Route path="/admin/referral-withdrawals" element={<ReferralWithdrawals />} />
           <Route path="/admin/documentation" element={<Documentation />} />
