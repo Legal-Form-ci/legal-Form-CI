@@ -69,6 +69,8 @@ import ContactMessages from "./pages/admin/ContactMessages";
 import CompaniesShowcase from "./pages/admin/CompaniesShowcase";
 import SearchResults from "./pages/SearchResults";
 import PageContentsAdmin from "./pages/admin/PageContentsAdmin";
+import NewsletterCompose from "./pages/admin/NewsletterCompose";
+import NewsletterUnsubscribe from "./pages/NewsletterUnsubscribe";
 
 const queryClient = new QueryClient();
 
@@ -156,6 +158,8 @@ const App = () => (
           <Route path="/news" element={<News />} />
           <Route path="/admin/news" element={<NewsManagement />} />
           <Route path="/admin/newsletter" element={<NewsletterAdmin />} />
+          <Route path="/admin/newsletter/compose" element={<NewsletterCompose />} />
+          <Route path="/newsletter/unsubscribe" element={<NewsletterUnsubscribe />} />
           <Route path="/admin/database" element={<DatabaseManager />} />
           <Route path="/admin/referral-withdrawals" element={<ReferralWithdrawals />} />
           <Route path="/admin/documentation" element={<Documentation />} />

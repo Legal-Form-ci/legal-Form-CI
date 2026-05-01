@@ -800,6 +800,51 @@ export type Database = {
         }
         Relationships: []
       }
+      newsletter_campaigns: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          failure_count: number | null
+          html_content: string
+          id: string
+          recipients_count: number | null
+          scheduled_at: string | null
+          sent_at: string | null
+          status: string
+          subject: string
+          success_count: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          failure_count?: number | null
+          html_content: string
+          id?: string
+          recipients_count?: number | null
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string
+          subject: string
+          success_count?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          failure_count?: number | null
+          html_content?: string
+          id?: string
+          recipients_count?: number | null
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          success_count?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       newsletter_subscribers: {
         Row: {
           created_at: string
@@ -1482,6 +1527,7 @@ export type Database = {
       }
       increment_blog_views: { Args: { post_id: string }; Returns: undefined }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      unsubscribe_newsletter: { Args: { _email: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "team" | "client"
