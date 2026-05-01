@@ -13,6 +13,8 @@ import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicato
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Globe } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const COUNTRY_CODES = [
   { code: "+225", country: "CI", name: "Côte d'Ivoire", flag: "🇨🇮" },
@@ -81,6 +83,30 @@ const Auth = () => {
   const [whatsapp, setWhatsapp] = useState("");
   const { signUp, signIn, user, userRole } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      toast({
+        title: "Connexion Google échouée",
+        description: err.message?.includes("provider is not enabled")
+          ? "Le fournisseur Google n'est pas activé dans Supabase. Activez-le dans Authentication → Providers."
+          : err.message,
+        variant: "destructive",
+      });
+      setGoogleLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (user && userRole !== null) {
