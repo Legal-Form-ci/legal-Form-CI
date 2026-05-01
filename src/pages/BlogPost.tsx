@@ -129,8 +129,8 @@ const BlogPostPage = () => {
   const getShareUrl = () => {
     if (!post) return window.location.href;
     const id = post.public_id || post.slug;
-    // Use og-image edge function URL so crawlers get proper OG tags with cover image
-    return `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/og-image?id=${id}`;
+    // Always share the clean public URL: /actualites/{public_id}
+    return `https://www.legalform.ci/actualites/${id}`;
   };
 
   const getArticleUrl = () => {
