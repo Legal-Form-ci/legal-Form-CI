@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Facebook, Twitter, Linkedin, Mail, Phone, MapPin, MessageCircle } from "lucide-react";
 import logo from "@/assets/logo.png";
+import NewsletterSubscribe from "@/components/NewsletterSubscribe";
 
 const Footer = () => {
   const { t } = useTranslation();
@@ -129,6 +130,21 @@ const Footer = () => {
                 </a>
               </li>
             </ul>
+          </div>
+        </div>
+
+        {/* Newsletter */}
+        <div className="mt-10 pt-8 border-t border-border">
+          <div className="max-w-2xl mx-auto text-center space-y-3">
+            <h3 className="font-heading font-semibold text-lg text-foreground">Restez informé</h3>
+            <p className="text-sm text-muted-foreground">
+              Recevez nos guides juridiques, actualités et offres exclusives directement dans votre boîte mail.
+            </p>
+            <div className="flex justify-center">
+              <div className="w-full max-w-md">
+                <NewsletterSubscribe source="footer" variant="inline" />
+              </div>
+            </div>
           </div>
         </div>
 
