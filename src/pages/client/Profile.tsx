@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -13,8 +12,12 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ArrowLeft, Camera, Loader2, Save, User } from "lucide-react";
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_REGEX = /^[+\d\s().-]{6,20}$/;
+const MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5 MB
+const ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+
 const Profile = () => {
-  const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -25,6 +28,7 @@ const Profile = () => {
     phone: "",
     avatar_url: "",
   });
+  const [errors, setErrors] = useState<{ full_name?: string; email?: string; phone?: string }>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -35,6 +39,7 @@ const Profile = () => {
       return;
     }
     if (user) fetchProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, authLoading]);
 
   const fetchProfile = async () => {
@@ -42,55 +47,93 @@ const Profile = () => {
       .from("profiles")
       .select("full_name, email, phone, avatar_url")
       .eq("user_id", user!.id)
-      .single();
+      .maybeSingle();
 
-    if (data) {
-      setProfile({
-        full_name: data.full_name || "",
-        email: data.email || user!.email || "",
-        phone: data.phone || "",
-        avatar_url: data.avatar_url || "",
-      });
-    } else if (error && error.code === "PGRST116") {
-      // No profile yet, use auth data
-      setProfile(prev => ({
-        ...prev,
-        email: user!.email || "",
-      }));
+    if (error && error.code !== "PGRST116") {
+      toast({ title: "Erreur de chargement", description: error.message, variant: "destructive" });
     }
+
+    setProfile({
+      full_name: data?.full_name || (user!.user_metadata as any)?.full_name || "",
+      email: data?.email || user!.email || "",
+      phone: data?.phone || "",
+      avatar_url: data?.avatar_url || (user!.user_metadata as any)?.avatar_url || "",
+    });
     setLoading(false);
+  };
+
+  const validate = () => {
+    const next: typeof errors = {};
+    if (!profile.full_name.trim() || profile.full_name.trim().length < 2) {
+      next.full_name = "Le nom doit contenir au moins 2 caractères.";
+    }
+    if (!EMAIL_REGEX.test(profile.email.trim())) {
+      next.email = "Adresse email invalide.";
+    }
+    if (profile.phone && !PHONE_REGEX.test(profile.phone.trim())) {
+      next.phone = "Numéro de téléphone invalide.";
+    }
+    setErrors(next);
+    return Object.keys(next).length === 0;
   };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
+      toast({ title: "Format non supporté", description: "Utilisez JPG, PNG, WEBP ou GIF.", variant: "destructive" });
+      return;
+    }
+    if (file.size > MAX_AVATAR_SIZE) {
+      toast({ title: "Fichier trop volumineux", description: "L'image doit faire moins de 5 Mo.", variant: "destructive" });
+      return;
+    }
+
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop();
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
       const path = `avatars/${user!.id}-${Date.now()}.${ext}`;
 
       const { error: uploadError } = await supabase.storage
         .from("documents")
-        .upload(path, file, { upsert: true });
+        .upload(path, file, { upsert: true, contentType: file.type });
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from("documents")
-        .getPublicUrl(path);
+      const { data: urlData } = supabase.storage.from("documents").getPublicUrl(path);
+      const newUrl = urlData.publicUrl;
 
-      setProfile(prev => ({ ...prev, avatar_url: urlData.publicUrl }));
-      toast({ title: "Photo mise à jour" });
+      // Persist immediately so it survives a reload even without "Save"
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .upsert({
+          user_id: user!.id,
+          avatar_url: newUrl,
+          full_name: profile.full_name,
+          email: profile.email,
+          phone: profile.phone,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "user_id" });
+
+      if (updateError) throw updateError;
+
+      setProfile(prev => ({ ...prev, avatar_url: newUrl }));
+      toast({ title: "Photo mise à jour ✅" });
     } catch (err: any) {
-      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+      toast({ title: "Échec de l'upload", description: err.message || "Réessayez plus tard.", variant: "destructive" });
     } finally {
       setUploading(false);
+      e.target.value = "";
     }
   };
 
   const handleSave = async () => {
     if (!user) return;
+    if (!validate()) {
+      toast({ title: "Formulaire incomplet", description: "Corrigez les erreurs avant d'enregistrer.", variant: "destructive" });
+      return;
+    }
     setSaving(true);
 
     try {
@@ -98,18 +141,31 @@ const Profile = () => {
         .from("profiles")
         .upsert({
           user_id: user.id,
-          full_name: profile.full_name,
-          email: profile.email,
-          phone: profile.phone,
+          full_name: profile.full_name.trim(),
+          email: profile.email.trim().toLowerCase(),
+          phone: profile.phone.trim(),
           avatar_url: profile.avatar_url || null,
           updated_at: new Date().toISOString(),
         }, { onConflict: "user_id" });
 
       if (error) throw error;
 
-      toast({ title: "Profil mis à jour avec succès" });
+      // Sync auth email if it changed
+      if (profile.email.trim().toLowerCase() !== (user.email || "").toLowerCase()) {
+        const { error: emailErr } = await supabase.auth.updateUser({ email: profile.email.trim().toLowerCase() });
+        if (emailErr) {
+          toast({
+            title: "Profil enregistré",
+            description: `Email du compte non modifié : ${emailErr.message}`,
+          });
+        } else {
+          toast({ title: "Profil enregistré", description: "Un email de confirmation a été envoyé pour valider la nouvelle adresse." });
+        }
+      } else {
+        toast({ title: "Profil enregistré ✅" });
+      }
     } catch (err: any) {
-      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+      toast({ title: "Échec de l'enregistrement", description: err.message || "Réessayez.", variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -133,8 +189,7 @@ const Profile = () => {
       <main className="pt-32 pb-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-2xl">
           <Button variant="ghost" onClick={() => navigate("/client/dashboard")} className="mb-6">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Retour au tableau de bord
+            <ArrowLeft className="mr-2 h-4 w-4" /> Retour au tableau de bord
           </Button>
 
           <Card>
@@ -148,13 +203,14 @@ const Profile = () => {
                   <label
                     htmlFor="avatar-upload"
                     className="absolute bottom-0 right-0 p-1.5 bg-primary text-primary-foreground rounded-full cursor-pointer hover:bg-primary/90 transition-colors"
+                    aria-label="Changer la photo de profil"
                   >
                     {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
                   </label>
                   <input
                     id="avatar-upload"
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
                     className="hidden"
                     onChange={handleAvatarUpload}
                     disabled={uploading}
@@ -162,32 +218,39 @@ const Profile = () => {
                 </div>
               </div>
               <CardTitle className="text-2xl">
-                <User className="inline-block mr-2 h-6 w-6" />
-                Mon Profil
+                <User className="inline-block mr-2 h-6 w-6" /> Mon Profil
               </CardTitle>
               <CardDescription>Gérez vos informations personnelles</CardDescription>
+              <p className="text-xs text-muted-foreground">JPG, PNG, WEBP, GIF — 5 Mo max.</p>
             </CardHeader>
 
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="full_name">Nom complet</Label>
+                <Label htmlFor="full_name">Nom complet *</Label>
                 <Input
                   id="full_name"
                   value={profile.full_name}
-                  onChange={e => setProfile(prev => ({ ...prev, full_name: e.target.value }))}
+                  onChange={e => setProfile(p => ({ ...p, full_name: e.target.value }))}
                   placeholder="Votre nom complet"
+                  aria-invalid={!!errors.full_name}
                 />
+                {errors.full_name && <p className="text-sm text-destructive">{errors.full_name}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Email *</Label>
                 <Input
                   id="email"
                   type="email"
                   value={profile.email}
-                  onChange={e => setProfile(prev => ({ ...prev, email: e.target.value }))}
+                  onChange={e => setProfile(p => ({ ...p, email: e.target.value }))}
                   placeholder="votre@email.com"
+                  aria-invalid={!!errors.email}
                 />
+                {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                <p className="text-xs text-muted-foreground">
+                  Modifier l'email enverra un lien de confirmation à la nouvelle adresse.
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -195,9 +258,11 @@ const Profile = () => {
                 <Input
                   id="phone"
                   value={profile.phone}
-                  onChange={e => setProfile(prev => ({ ...prev, phone: e.target.value }))}
+                  onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))}
                   placeholder="+225 07 00 00 00 00"
+                  aria-invalid={!!errors.phone}
                 />
+                {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
               </div>
 
               <Button onClick={handleSave} disabled={saving} className="w-full" size="lg">
