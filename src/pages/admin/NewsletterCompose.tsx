@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import WysiwygEditor from "@/components/WysiwygEditor";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -156,8 +157,12 @@ const NewsletterCompose = () => {
                   <Input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Newsletter Legal Form – Mai 2026" />
                 </div>
                 <div className="space-y-2">
-                  <Label>Contenu HTML</Label>
-                  <Textarea value={html} onChange={(e) => setHtml(e.target.value)} rows={14} className="font-mono text-sm" />
+                  <Label>Contenu de l'email</Label>
+                  <WysiwygEditor value={html} onChange={setHtml} className="rounded-md border" />
+                  <details className="text-xs text-muted-foreground">
+                    <summary className="cursor-pointer">Éditer le HTML brut (avancé)</summary>
+                    <Textarea value={html} onChange={(e) => setHtml(e.target.value)} rows={8} className="font-mono text-xs mt-2" />
+                  </details>
                 </div>
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2"><Calendar className="h-4 w-4" /> Planifier (optionnel)</Label>
