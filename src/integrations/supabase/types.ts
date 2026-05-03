@@ -845,6 +845,47 @@ export type Database = {
         }
         Relationships: []
       }
+      newsletter_send_logs: {
+        Row: {
+          attempt: number
+          campaign_id: string
+          created_at: string
+          error_message: string | null
+          id: string
+          provider_message_id: string | null
+          recipient_email: string
+          status: string
+        }
+        Insert: {
+          attempt?: number
+          campaign_id: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          provider_message_id?: string | null
+          recipient_email: string
+          status: string
+        }
+        Update: {
+          attempt?: number
+          campaign_id?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          provider_message_id?: string | null
+          recipient_email?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "newsletter_send_logs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "newsletter_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       newsletter_subscribers: {
         Row: {
           created_at: string
@@ -1527,6 +1568,7 @@ export type Database = {
       }
       increment_blog_views: { Args: { post_id: string }; Returns: undefined }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      reset_stuck_newsletter_campaigns: { Args: never; Returns: number }
       unsubscribe_newsletter: { Args: { _email: string }; Returns: boolean }
     }
     Enums: {
