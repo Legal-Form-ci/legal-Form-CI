@@ -30,14 +30,14 @@ Deno.test("missing campaignId returns 400", async () => {
 
 Deno.test("unsubscribe RPC marks subscriber inactive", async () => {
   const testEmail = `e2e-${Date.now()}@example.com`;
-  // Subscribe
+  // Subscribe (anon role; sending Authorization re-asserts anon, fine)
   const sub = await fetch(`${SUPABASE_URL}/rest/v1/newsletter_subscribers`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", apikey: ANON, Authorization: `Bearer ${ANON}`, Prefer: "return=representation" },
+    headers: { "Content-Type": "application/json", apikey: ANON, Prefer: "return=minimal" },
     body: JSON.stringify({ email: testEmail, source: "e2e-test" }),
   });
-  assert(sub.ok, `subscribe failed: ${sub.status} ${await sub.text()}`);
-  await sub.text();
+  const subBody = await sub.text();
+  assert(sub.ok, `subscribe failed: ${sub.status} ${subBody}`);
 
   // Unsubscribe via RPC
   const unsub = await fetch(`${SUPABASE_URL}/rest/v1/rpc/unsubscribe_newsletter`, {
