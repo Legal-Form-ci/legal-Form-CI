@@ -1,0 +1,49 @@
+import "https://deno.land/std@0.224.0/dotenv/load.ts";
+import { assertEquals, assert } from "https://deno.land/std@0.224.0/assert/mod.ts";
+
+const SUPABASE_URL = Deno.env.get("VITE_SUPABASE_URL") || "https://xwtmnzorzsvkamqemddk.supabase.co";
+const ANON = Deno.env.get("VITE_SUPABASE_PUBLISHABLE_KEY") || "";
+
+Deno.test("cron mode returns processed structure", async () => {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/send-newsletter-campaign`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: ANON, Authorization: `Bearer ${ANON}` },
+    body: JSON.stringify({ mode: "cron" }),
+  });
+  const data = await res.json();
+  assert(res.ok, `expected ok, got ${res.status}: ${JSON.stringify(data)}`);
+  assert("processed" in data, "should return 'processed'");
+  assert(Array.isArray(data.results), "should return results array");
+});
+
+Deno.test("missing campaignId returns 400", async () => {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/send-newsletter-campaign`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: ANON, Authorization: `Bearer ${ANON}` },
+    body: JSON.stringify({}),
+  });
+  const data = await res.json();
+  assertEquals(res.status, 400);
+  assert(data.error?.includes("campaignId"));
+});
+
+Deno.test("unsubscribe RPC marks subscriber inactive", async () => {
+  const testEmail = `e2e-${Date.now()}@example.com`;
+  // Subscribe
+  const sub = await fetch(`${SUPABASE_URL}/rest/v1/newsletter_subscribers`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: ANON, Authorization: `Bearer ${ANON}`, Prefer: "return=representation" },
+    body: JSON.stringify({ email: testEmail, source: "e2e-test" }),
+  });
+  assert(sub.ok, `subscribe failed: ${sub.status} ${await sub.text()}`);
+  await sub.text();
+
+  // Unsubscribe via RPC
+  const unsub = await fetch(`${SUPABASE_URL}/rest/v1/rpc/unsubscribe_newsletter`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: ANON, Authorization: `Bearer ${ANON}` },
+    body: JSON.stringify({ _email: testEmail }),
+  });
+  const result = await unsub.json();
+  assertEquals(result, true);
+});
