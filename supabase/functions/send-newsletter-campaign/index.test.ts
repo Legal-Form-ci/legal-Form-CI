@@ -2,7 +2,8 @@ import "https://deno.land/std@0.224.0/dotenv/load.ts";
 import { assertEquals, assert } from "https://deno.land/std@0.224.0/assert/mod.ts";
 
 const SUPABASE_URL = Deno.env.get("VITE_SUPABASE_URL") || "https://xwtmnzorzsvkamqemddk.supabase.co";
-const ANON = Deno.env.get("VITE_SUPABASE_PUBLISHABLE_KEY") || "";
+const ANON = Deno.env.get("VITE_SUPABASE_PUBLISHABLE_KEY") ||
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3dG1uem9yenN2a2FtcWVtZGRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2MDIyNzQsImV4cCI6MjA4OTE3ODI3NH0.QE1RN4EiQd2bB5RD41mtRP_Gn4mJ21QaA7WvU69MVig";
 
 Deno.test("cron mode returns processed structure", async () => {
   const res = await fetch(`${SUPABASE_URL}/functions/v1/send-newsletter-campaign`, {
