@@ -151,26 +151,26 @@ async function sendCampaign(
         ok = true;
         providerId = `simulated-${crypto.randomUUID()}`;
       } else {
-      const ctrl = new AbortController();
-      const timeout = setTimeout(() => ctrl.abort(), 15000);
-      const res = await fetch(`${GATEWAY_URL}/emails`, {
-        method: "POST",
-        signal: ctrl.signal,
-        headers: {
-          "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-          "X-Connection-Api-Key": RESEND_API_KEY,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ from: DEFAULT_FROM, to: [r.email], subject: campaign.subject, html }),
-      });
-      clearTimeout(timeout);
-      const text = await res.text();
-      if (res.ok) {
-        ok = true;
-        try { providerId = JSON.parse(text)?.id || null; } catch (_) {}
-      } else {
-        errMsg = `HTTP ${res.status}: ${text.slice(0, 500)}`;
-      }
+        const ctrl = new AbortController();
+        const timeout = setTimeout(() => ctrl.abort(), 15000);
+        const res = await fetch(`${GATEWAY_URL}/emails`, {
+          method: "POST",
+          signal: ctrl.signal,
+          headers: {
+            "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+            "X-Connection-Api-Key": RESEND_API_KEY,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ from: DEFAULT_FROM, to: [r.email], subject: campaign.subject, html }),
+        });
+        clearTimeout(timeout);
+        const text = await res.text();
+        if (res.ok) {
+          ok = true;
+          try { providerId = JSON.parse(text)?.id || null; } catch (_) {}
+        } else {
+          errMsg = `HTTP ${res.status}: ${text.slice(0, 500)}`;
+        }
       }
     } catch (e: any) {
       errMsg = e?.name === "AbortError" ? "Timeout (15s)" : (e?.message || "Unknown error");
@@ -201,7 +201,8 @@ async function sendCampaign(
       .select("*", { count: "exact", head: true })
       .eq("campaign_id", campaignId).eq("status", "failed");
 
-    const finalStatus = (successTotal || 0) > 0 ? "sent" : "failed";
+    const finalStatus = (successTotal || 0) > 0 && (failureTotal || 0) === 0 ? "sent" :
+      (successTotal || 0) > 0 ? "partial_failed" : "failed";
     await supabase.from("newsletter_campaigns").update({
       status: finalStatus,
       sent_at: new Date().toISOString(),
