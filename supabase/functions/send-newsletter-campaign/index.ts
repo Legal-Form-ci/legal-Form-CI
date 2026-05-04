@@ -81,6 +81,7 @@ async function sendCampaign(
   LOVABLE_API_KEY: string,
   campaignId: string,
   testEmail?: string,
+  options: { simulate?: boolean } = {},
 ) {
   const { data: campaign, error: campErr } = await supabase
     .from("newsletter_campaigns").select("*").eq("id", campaignId).maybeSingle();
@@ -91,6 +92,9 @@ async function sendCampaign(
   if (!testEmail) {
     if (campaign.status === "sent") {
       return { skipped: true, reason: "already sent", success: 0, failure: 0, total: 0 };
+    }
+    if (campaign.status === "partial_failed") {
+      return { skipped: true, reason: "partial_failed requires manual review", success: 0, failure: 0, total: 0 };
     }
     await supabase.from("newsletter_campaigns")
       .update({ status: "sending", updated_at: new Date().toISOString() })
@@ -143,6 +147,10 @@ async function sendCampaign(
     let ok = false;
 
     try {
+      if (options.simulate) {
+        ok = true;
+        providerId = `simulated-${crypto.randomUUID()}`;
+      } else {
       const ctrl = new AbortController();
       const timeout = setTimeout(() => ctrl.abort(), 15000);
       const res = await fetch(`${GATEWAY_URL}/emails`, {
@@ -162,6 +170,7 @@ async function sendCampaign(
         try { providerId = JSON.parse(text)?.id || null; } catch (_) {}
       } else {
         errMsg = `HTTP ${res.status}: ${text.slice(0, 500)}`;
+      }
       }
     } catch (e: any) {
       errMsg = e?.name === "AbortError" ? "Timeout (15s)" : (e?.message || "Unknown error");
@@ -203,5 +212,5 @@ async function sendCampaign(
     }).eq("id", campaignId);
   }
 
-  return { success, failure, skipped, total: recipients.length, test: !!testEmail };
+  return { success, failure, skipped, total: recipients.length, test: !!testEmail, simulated: !!options.simulate };
 }
