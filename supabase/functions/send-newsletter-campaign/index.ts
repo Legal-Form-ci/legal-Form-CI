@@ -2,7 +2,7 @@
 // - Logs every recipient attempt in newsletter_send_logs
 // - Skips already-successful recipients on retry (resilient)
 // - Resets stuck "sending" campaigns
-// - FROM email configurable via NEWSLETTER_FROM secret (fallback resend.dev)
+// - FROM email configurable via NEWSLETTER_FROM secret (fallback legalform.ci)
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -12,7 +12,7 @@ const corsHeaders = {
 };
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
-const DEFAULT_FROM = Deno.env.get("NEWSLETTER_FROM") || "Legal Form <onboarding@resend.dev>";
+const DEFAULT_FROM = Deno.env.get("NEWSLETTER_FROM") || "Legal Form <newsletter@legalform.ci>";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -20,6 +20,8 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const authHeader = req.headers.get("Authorization") || req.headers.get("authorization") || "";
+    const isServiceCaller = authHeader === `Bearer ${serviceKey}`;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY_1") || Deno.env.get("RESEND_API_KEY");
 
@@ -31,20 +33,27 @@ serve(async (req) => {
     let body: any = {};
     try { body = await req.json(); } catch (_) { body = {}; }
     const { campaignId, testEmail, mode } = body;
+    const simulate = body?.simulate === true;
+    if (simulate && !isServiceCaller) return json({ error: "Simulation réservée aux tests serveur" }, 403);
 
     if (mode === "cron") {
       // 1) Recover stuck campaigns
       await supabase.rpc("reset_stuck_newsletter_campaigns");
       // 2) Pick due scheduled campaigns
-      const { data: due } = await supabase
+      let dueQuery = supabase
         .from("newsletter_campaigns")
         .select("id")
         .eq("status", "scheduled")
         .lte("scheduled_at", new Date().toISOString());
+      if (campaignId) {
+        if (!isServiceCaller) return json({ error: "campaignId cron réservé aux tests serveur" }, 403);
+        dueQuery = dueQuery.eq("id", campaignId);
+      }
+      const { data: due } = await dueQuery;
 
       const results: any[] = [];
       for (const c of due || []) {
-        const r = await sendCampaign(supabase, RESEND_API_KEY, LOVABLE_API_KEY, c.id);
+        const r = await sendCampaign(supabase, RESEND_API_KEY, LOVABLE_API_KEY, c.id, undefined, { simulate });
         results.push({ id: c.id, ...r });
       }
       return json({ processed: results.length, results });
@@ -72,6 +81,7 @@ async function sendCampaign(
   LOVABLE_API_KEY: string,
   campaignId: string,
   testEmail?: string,
+  options: { simulate?: boolean } = {},
 ) {
   const { data: campaign, error: campErr } = await supabase
     .from("newsletter_campaigns").select("*").eq("id", campaignId).maybeSingle();
@@ -82,6 +92,9 @@ async function sendCampaign(
   if (!testEmail) {
     if (campaign.status === "sent") {
       return { skipped: true, reason: "already sent", success: 0, failure: 0, total: 0 };
+    }
+    if (campaign.status === "partial_failed") {
+      return { skipped: true, reason: "partial_failed requires manual review", success: 0, failure: 0, total: 0 };
     }
     await supabase.from("newsletter_campaigns")
       .update({ status: "sending", updated_at: new Date().toISOString() })
@@ -134,25 +147,30 @@ async function sendCampaign(
     let ok = false;
 
     try {
-      const ctrl = new AbortController();
-      const timeout = setTimeout(() => ctrl.abort(), 15000);
-      const res = await fetch(`${GATEWAY_URL}/emails`, {
-        method: "POST",
-        signal: ctrl.signal,
-        headers: {
-          "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-          "X-Connection-Api-Key": RESEND_API_KEY,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ from: DEFAULT_FROM, to: [r.email], subject: campaign.subject, html }),
-      });
-      clearTimeout(timeout);
-      const text = await res.text();
-      if (res.ok) {
+      if (options.simulate) {
         ok = true;
-        try { providerId = JSON.parse(text)?.id || null; } catch (_) {}
+        providerId = `simulated-${crypto.randomUUID()}`;
       } else {
-        errMsg = `HTTP ${res.status}: ${text.slice(0, 500)}`;
+        const ctrl = new AbortController();
+        const timeout = setTimeout(() => ctrl.abort(), 15000);
+        const res = await fetch(`${GATEWAY_URL}/emails`, {
+          method: "POST",
+          signal: ctrl.signal,
+          headers: {
+            "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+            "X-Connection-Api-Key": RESEND_API_KEY,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ from: DEFAULT_FROM, to: [r.email], subject: campaign.subject, html }),
+        });
+        clearTimeout(timeout);
+        const text = await res.text();
+        if (res.ok) {
+          ok = true;
+          try { providerId = JSON.parse(text)?.id || null; } catch (_) {}
+        } else {
+          errMsg = `HTTP ${res.status}: ${text.slice(0, 500)}`;
+        }
       }
     } catch (e: any) {
       errMsg = e?.name === "AbortError" ? "Timeout (15s)" : (e?.message || "Unknown error");
@@ -183,7 +201,8 @@ async function sendCampaign(
       .select("*", { count: "exact", head: true })
       .eq("campaign_id", campaignId).eq("status", "failed");
 
-    const finalStatus = (successTotal || 0) > 0 ? "sent" : "failed";
+    const finalStatus = (successTotal || 0) > 0 && (failureTotal || 0) === 0 ? "sent" :
+      (successTotal || 0) > 0 ? "partial_failed" : "failed";
     await supabase.from("newsletter_campaigns").update({
       status: finalStatus,
       sent_at: new Date().toISOString(),
@@ -194,5 +213,5 @@ async function sendCampaign(
     }).eq("id", campaignId);
   }
 
-  return { success, failure, skipped, total: recipients.length, test: !!testEmail };
+  return { success, failure, skipped, total: recipients.length, test: !!testEmail, simulated: !!options.simulate };
 }

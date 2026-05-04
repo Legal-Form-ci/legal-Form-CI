@@ -101,10 +101,14 @@ const NewsletterCompose = () => {
     setLoading(false);
     if (error) {
       toast({ title: "Erreur d'envoi", description: error.message, variant: "destructive" });
+    } else if (data?.error) {
+      toast({ title: "Erreur d'envoi", description: data.error, variant: "destructive" });
     } else {
       toast({
         title: isTest ? "Email de test envoyé" : "Campagne envoyée",
-        description: `${data?.success || 0}/${data?.total || 0} envois réussis`,
+        description: data?.failure
+          ? `${data?.success || 0}/${data?.total || 0} réussis • ${data.failure} échec(s)`
+          : `${data?.success || 0}/${data?.total || 0} envois réussis`,
       });
       load();
     }
@@ -124,6 +128,7 @@ const NewsletterCompose = () => {
       scheduled: "bg-blue-100 text-blue-800",
       sending: "bg-yellow-100 text-yellow-800",
       sent: "bg-green-100 text-green-800",
+      partial_failed: "bg-orange-100 text-orange-800",
       failed: "bg-red-100 text-red-800",
     };
     return <Badge className={map[s] || ""}>{s}</Badge>;
@@ -132,9 +137,9 @@ const NewsletterCompose = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2"><Mail className="h-7 w-7" /> Composer la newsletter</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2"><Mail className="h-6 w-6 sm:h-7 sm:w-7" /> Composer la newsletter</h1>
             <p className="text-muted-foreground">{activeSubs} abonné(s) actif(s)</p>
           </div>
         </div>
@@ -169,14 +174,14 @@ const NewsletterCompose = () => {
                   <Input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} />
                 </div>
 
-                <div className="flex flex-wrap gap-2">
-                  <Button onClick={() => save(false)} variant="outline" disabled={loading}>
+                <div className="grid gap-2 sm:flex sm:flex-wrap">
+                  <Button onClick={() => save(false)} variant="outline" disabled={loading} className="w-full sm:w-auto">
                     <Save className="mr-2 h-4 w-4" /> Enregistrer brouillon
                   </Button>
-                  <Button onClick={() => save(true)} variant="outline" disabled={loading || !scheduledAt}>
+                  <Button onClick={() => save(true)} variant="outline" disabled={loading || !scheduledAt} className="w-full sm:w-auto">
                     <Calendar className="mr-2 h-4 w-4" /> Planifier
                   </Button>
-                  <Button onClick={() => sendNow(undefined, false)} disabled={loading || !editingId}>
+                  <Button onClick={() => sendNow(undefined, false)} disabled={loading || !editingId} className="w-full sm:w-auto">
                     {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
                     Envoyer maintenant
                   </Button>
@@ -185,9 +190,9 @@ const NewsletterCompose = () => {
 
                 <div className="border-t pt-4 space-y-2">
                   <Label>Email de test</Label>
-                  <div className="flex gap-2">
+                  <div className="grid gap-2 sm:flex">
                     <Input value={testEmail} onChange={(e) => setTestEmail(e.target.value)} placeholder="vous@exemple.com" />
-                    <Button onClick={() => sendNow(undefined, true)} variant="secondary" disabled={loading || !editingId}>
+                    <Button onClick={() => sendNow(undefined, true)} variant="secondary" disabled={loading || !editingId} className="w-full sm:w-auto">
                       Envoyer test
                     </Button>
                   </div>
@@ -223,7 +228,7 @@ const NewsletterCompose = () => {
                       </div>
                       <div className="flex gap-2">
                         <Button size="sm" variant="outline" onClick={() => editCampaign(c)}>Modifier</Button>
-                        {c.status !== "sent" && (
+                        {!["sent", "partial_failed", "sending"].includes(c.status) && (
                           <Button size="sm" onClick={() => sendNow(c.id, false)}>Envoyer</Button>
                         )}
                       </div>
