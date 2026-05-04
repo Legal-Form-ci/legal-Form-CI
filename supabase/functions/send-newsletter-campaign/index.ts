@@ -20,6 +20,8 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const authHeader = req.headers.get("Authorization") || req.headers.get("authorization") || "";
+    const isServiceCaller = authHeader === `Bearer ${serviceKey}`;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY_1") || Deno.env.get("RESEND_API_KEY");
 
@@ -31,20 +33,27 @@ serve(async (req) => {
     let body: any = {};
     try { body = await req.json(); } catch (_) { body = {}; }
     const { campaignId, testEmail, mode } = body;
+    const simulate = body?.simulate === true;
+    if (simulate && !isServiceCaller) return json({ error: "Simulation réservée aux tests serveur" }, 403);
 
     if (mode === "cron") {
       // 1) Recover stuck campaigns
       await supabase.rpc("reset_stuck_newsletter_campaigns");
       // 2) Pick due scheduled campaigns
-      const { data: due } = await supabase
+      let dueQuery = supabase
         .from("newsletter_campaigns")
         .select("id")
         .eq("status", "scheduled")
         .lte("scheduled_at", new Date().toISOString());
+      if (campaignId) {
+        if (!isServiceCaller) return json({ error: "campaignId cron réservé aux tests serveur" }, 403);
+        dueQuery = dueQuery.eq("id", campaignId);
+      }
+      const { data: due } = await dueQuery;
 
       const results: any[] = [];
       for (const c of due || []) {
-        const r = await sendCampaign(supabase, RESEND_API_KEY, LOVABLE_API_KEY, c.id);
+        const r = await sendCampaign(supabase, RESEND_API_KEY, LOVABLE_API_KEY, c.id, undefined, { simulate });
         results.push({ id: c.id, ...r });
       }
       return json({ processed: results.length, results });
