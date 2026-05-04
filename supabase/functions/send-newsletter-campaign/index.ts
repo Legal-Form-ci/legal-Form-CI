@@ -2,7 +2,7 @@
 // - Logs every recipient attempt in newsletter_send_logs
 // - Skips already-successful recipients on retry (resilient)
 // - Resets stuck "sending" campaigns
-// - FROM email configurable via NEWSLETTER_FROM secret (fallback resend.dev)
+// - FROM email configurable via NEWSLETTER_FROM secret (fallback legalform.ci)
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -12,7 +12,7 @@ const corsHeaders = {
 };
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
-const DEFAULT_FROM = Deno.env.get("NEWSLETTER_FROM") || "Legal Form <onboarding@resend.dev>";
+const DEFAULT_FROM = Deno.env.get("NEWSLETTER_FROM") || "Legal Form <newsletter@legalform.ci>";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
