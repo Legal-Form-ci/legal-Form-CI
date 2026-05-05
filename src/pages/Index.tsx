@@ -78,7 +78,7 @@ const Index = () => {
   ];
 
   const defaultTestimonials: HomeTestimonial[] = [
-    { name: "Inocent KOFFI", company: "AGRICAPITAL SARL", region: "Daloa", rating: 5, comment: t('home.testimonials.koffi', 'Service rapide et professionnel. L\'équipe Legal Form a été disponible à chaque étape.'), logo: "/images/agricapital-logo.jpg" },
+    { name: "Inocent KOFFI", company: "AGRICAPITAL SARL", region: "Daloa", rating: 5, comment: t('home.testimonials.koffi', 'Service rapide et professionnel. L\'équipe Legal Form a été disponible à chaque étape.'), logo: `/images/agricapital-logo.jpg?v=${Date.now().toString().slice(0,8)}` },
     { name: "KOUASSI Marie", company: "TECHNOVATE SARL", region: "Abidjan", rating: 5, comment: t('home.testimonials.kouassi', 'J\'ai créé mon entreprise en peu de temps.') },
     { name: "DIALLO Amadou", company: "BATIR CI SARL", region: "Bouaké", rating: 5, comment: t('home.testimonials.diallo', 'Processus simplifié, équipe compétente. Je recommande vivement Legal Form.') },
   ];
