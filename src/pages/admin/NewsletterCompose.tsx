@@ -10,7 +10,9 @@ import WysiwygEditor from "@/components/WysiwygEditor";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Send, Save, Calendar, Loader2, Mail, Eye } from "lucide-react";
+import { Send, Save, Calendar, Loader2, Mail, Eye, ScrollText } from "lucide-react";
+import { Link } from "react-router-dom";
+import DnsStatusCard from "@/components/admin/DnsStatusCard";
 
 interface Campaign {
   id: string;
@@ -142,6 +144,20 @@ const NewsletterCompose = () => {
             <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2"><Mail className="h-6 w-6 sm:h-7 sm:w-7" /> Composer la newsletter</h1>
             <p className="text-muted-foreground">{activeSubs} abonné(s) actif(s)</p>
           </div>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin/newsletter/logs"><ScrollText className="h-4 w-4 mr-1" /> Journal des envois</Link>
+          </Button>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <DnsStatusCard />
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-base">Astuce</CardTitle></CardHeader>
+            <CardContent className="text-sm text-muted-foreground">
+              Tant que SPF/DKIM/DMARC ne sont pas <strong>OK</strong>, les emails risquent d'être marqués comme spam.
+              Ajoutez les enregistrements DNS fournis dans Resend depuis votre hébergeur.
+            </CardContent>
+          </Card>
         </div>
 
         <Tabs defaultValue="compose">
