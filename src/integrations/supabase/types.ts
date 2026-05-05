@@ -1568,7 +1568,7 @@ export type Database = {
       }
       increment_blog_views: { Args: { post_id: string }; Returns: undefined }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
-      reset_stuck_newsletter_campaigns: { Args: never; Returns: number }
+      reset_stuck_newsletter_campaigns: { Args: never; Returns: Json }
       unsubscribe_newsletter: { Args: { _email: string }; Returns: boolean }
     }
     Enums: {
