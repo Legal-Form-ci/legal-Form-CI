@@ -406,6 +406,39 @@ export type Database = {
         }
         Relationships: []
       }
+      dns_check_history: {
+        Row: {
+          all_ok: boolean
+          checked_at: string
+          details: Json | null
+          dkim_ok: boolean
+          dmarc_ok: boolean
+          domain: string
+          id: string
+          spf_ok: boolean
+        }
+        Insert: {
+          all_ok?: boolean
+          checked_at?: string
+          details?: Json | null
+          dkim_ok?: boolean
+          dmarc_ok?: boolean
+          domain: string
+          id?: string
+          spf_ok?: boolean
+        }
+        Update: {
+          all_ok?: boolean
+          checked_at?: string
+          details?: Json | null
+          dkim_ok?: boolean
+          dmarc_ok?: boolean
+          domain?: string
+          id?: string
+          spf_ok?: boolean
+        }
+        Relationships: []
+      }
       ebook_downloads: {
         Row: {
           created_at: string
