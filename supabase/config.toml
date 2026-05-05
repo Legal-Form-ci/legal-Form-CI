@@ -50,3 +50,6 @@ verify_jwt = false
 
 [functions.translate-content]
 verify_jwt = false
+
+[functions.check-dns-records]
+verify_jwt = false
