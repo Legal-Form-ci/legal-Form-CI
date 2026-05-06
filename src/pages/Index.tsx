@@ -209,51 +209,60 @@ const Index = () => {
       </section>
 
       {/* Services Section */}
-      <section className="py-20 lg:py-32">
+      <section className="py-16 sm:py-20 lg:py-28">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground mb-4">
-              {t('home.services.title', 'Nos Services')}
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {t('home.services.subtitle', 'Créer, gérer et accompagner votre entreprise en Côte d\'Ivoire et partout dans le monde.')}
-            </p>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12 lg:mb-16">
+            <div className="text-left max-w-2xl">
+              <span className="inline-block text-xs font-semibold tracking-widest uppercase text-primary mb-3">
+                {t('home.services.eyebrow', 'Notre expertise')}
+              </span>
+              <h2 className="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground leading-tight mb-4">
+                {t('home.services.title', 'Nos Services')}
+              </h2>
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
+                {t('home.services.subtitle', 'Créer, gérer et accompagner votre entreprise en Côte d\'Ivoire et partout dans le monde.')}
+              </p>
+            </div>
+            <div className="hidden md:flex md:justify-end md:text-right">
+              <Link to="/services">
+                <Button variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-white">
+                  {t('home.services.viewAll', 'Voir tous nos services')}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
             {services.map((service, index) => {
               const Icon = service.icon;
               return (
-                <Card key={index} className="border-2 hover:border-primary hover:shadow-strong transition-all duration-300 group">
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary group-hover:text-white transition-colors w-fit">
-                        <Icon className="h-8 w-8 text-primary group-hover:text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-heading font-semibold text-xl text-foreground mb-2">{service.title}</h3>
-                        <p className="text-muted-foreground mb-4">{service.description}</p>
-                        <ul className="space-y-2">
-                          {service.items.map((item, i) => (
-                            <li key={i} className="flex items-start text-sm text-muted-foreground">
-                              <CheckCircle2 className="h-4 w-4 text-primary mr-2 flex-shrink-0 mt-0.5" />
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                <Card key={index} className="border border-border/60 hover:border-primary hover:shadow-strong transition-all duration-300 group h-full">
+                  <CardContent className="p-6 flex flex-col h-full">
+                    <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary transition-colors w-fit mb-5">
+                      <Icon className="h-7 w-7 text-primary group-hover:text-white transition-colors" />
                     </div>
+                    <h3 className="font-heading font-semibold text-lg text-foreground mb-2 text-left">{service.title}</h3>
+                    <p className="text-sm text-muted-foreground mb-4 text-left leading-relaxed">{service.description}</p>
+                    <ul className="space-y-2 mt-auto">
+                      {service.items.map((item, i) => (
+                        <li key={i} className="flex items-start text-sm text-muted-foreground text-left">
+                          <CheckCircle2 className="h-4 w-4 text-primary mr-2 flex-shrink-0 mt-0.5" />
+                          <span className="leading-snug">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </CardContent>
                 </Card>
               );
             })}
           </div>
 
-          <div className="text-center mt-12">
+          <div className="md:hidden text-center mt-10">
             <Link to="/services">
-              <Button size="lg" variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-white">
+              <Button variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-white">
                 {t('home.services.viewAll', 'Voir tous nos services')}
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>
@@ -261,37 +270,37 @@ const Index = () => {
       </section>
 
       {/* Steps Section */}
-      <section className="py-20 lg:py-32 bg-muted">
+      <section className="py-16 sm:py-20 lg:py-28 bg-muted">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground mb-4">
+          <div className="max-w-3xl mb-12 lg:mb-16">
+            <span className="inline-block text-xs font-semibold tracking-widest uppercase text-primary mb-3">
+              {t('home.steps.eyebrow', 'Processus')}
+            </span>
+            <h2 className="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground leading-tight mb-4">
               {t('home.steps.title', 'Comment ça marche ?')}
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
               {t('home.steps.subtitle', 'Créez votre entreprise en 4 étapes simples')}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
             {steps.map((step, index) => (
               <div key={index} className="relative">
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-hero text-white font-heading font-bold text-2xl mb-4 shadow-soft">
+                <div className="bg-background rounded-xl p-6 h-full border border-border/60 hover:shadow-soft transition-shadow">
+                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-hero text-white font-heading font-bold text-xl mb-4 shadow-soft">
                     {step.number}
                   </div>
-                  <h3 className="font-heading font-semibold text-lg text-foreground mb-2">{step.title}</h3>
-                  <p className="text-muted-foreground">{step.description}</p>
+                  <h3 className="font-heading font-semibold text-lg text-foreground mb-2 text-left leading-snug">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground text-left leading-relaxed">{step.description}</p>
                 </div>
-                {index < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-8 left-full w-full h-0.5 bg-gradient-to-r from-primary to-transparent -translate-x-1/2" />
-                )}
               </div>
             ))}
           </div>
 
-          <div className="text-center mt-12">
+          <div className="flex justify-start mt-10 lg:mt-12">
             <Link to="/create">
-              <Button size="lg" className="bg-gradient-accent hover:opacity-90 shadow-soft text-lg px-8 py-6 h-auto font-semibold">
+              <Button size="lg" className="bg-gradient-accent hover:opacity-90 shadow-soft text-base px-7 py-6 h-auto font-semibold">
                 {t('home.steps.cta', 'Commencer maintenant')}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
@@ -301,60 +310,77 @@ const Index = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 lg:py-32">
+      <section className="py-16 sm:py-20 lg:py-28">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground mb-4">
-              {t('home.testimonials.title', 'Ce qu\'ils disent de nous')}
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {t('home.testimonials.subtitle', 'Découvrez les témoignages de nos clients satisfaits')}
-            </p>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12 lg:mb-16">
+            <div className="text-left max-w-2xl">
+              <span className="inline-block text-xs font-semibold tracking-widest uppercase text-primary mb-3">
+                {t('home.testimonials.eyebrow', 'Témoignages')}
+              </span>
+              <h2 className="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground leading-tight mb-4">
+                {t('home.testimonials.title', 'Ce qu\'ils disent de nous')}
+              </h2>
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
+                {t('home.testimonials.subtitle', 'Découvrez les témoignages de nos clients satisfaits')}
+              </p>
+            </div>
+            <div className="hidden md:flex md:gap-3 md:justify-end">
+              <Link to="/testimonials">
+                <Button variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-white">
+                  {t('home.testimonials.viewAll', 'Voir tous')}
+                </Button>
+              </Link>
+              <Link to="/testimonials?action=submit">
+                <Button className="bg-accent hover:bg-accent/90 text-white">
+                  {t('home.testimonials.submit', 'Laisser un témoignage')}
+                </Button>
+              </Link>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="border-2 hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
+              <Card key={index} className="border border-border/60 hover:shadow-strong hover:-translate-y-1 transition-all duration-300 h-full">
+                <CardContent className="p-6 flex flex-col h-full">
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="w-16 h-16 rounded-full overflow-hidden bg-white border-2 border-primary/20 flex items-center justify-center p-1">
+                    <div className="w-14 h-14 rounded-full overflow-hidden bg-white border-2 border-primary/20 flex items-center justify-center p-1 flex-shrink-0">
                       {testimonial.logo ? (
                         <img src={testimonial.logo} alt={testimonial.company} className="w-full h-full object-contain rounded-full"
                           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden'); }}
                         />
                       ) : null}
-                      <span className={`text-xl font-bold text-primary ${testimonial.logo ? 'hidden' : ''}`}>
+                      <span className={`text-lg font-bold text-primary ${testimonial.logo ? 'hidden' : ''}`}>
                         {testimonial.name.charAt(0)}
                       </span>
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0 text-left">
                       <div className="flex items-center mb-1">
                         {[...Array(testimonial.rating)].map((_, i) => (
                           <Star key={i} className="h-4 w-4 text-accent fill-current" />
                         ))}
                       </div>
-                      <p className="font-semibold text-foreground">{testimonial.name}</p>
-                      <p className="text-sm text-primary font-medium">{testimonial.company}</p>
+                      <p className="font-semibold text-foreground text-sm truncate">{testimonial.name}</p>
+                      <p className="text-xs text-primary font-medium truncate">{testimonial.company}</p>
                     </div>
                   </div>
-                  <p className="text-muted-foreground mb-4 italic">"{testimonial.comment}"</p>
-                  <div className="flex items-center justify-end pt-4 border-t border-border">
-                    <span className="text-sm text-muted-foreground">{testimonial.region}</span>
+                  <p className="text-sm text-muted-foreground italic leading-relaxed text-left mb-4 flex-1">"{testimonial.comment}"</p>
+                  <div className="flex items-center justify-between pt-4 border-t border-border">
+                    <span className="text-xs text-muted-foreground uppercase tracking-wide">Client vérifié</span>
+                    <span className="text-xs text-muted-foreground font-medium">{testimonial.region}</span>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
 
-          <div className="text-center mt-12 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/testimonials">
-              <Button size="lg" variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-white">
+          <div className="md:hidden flex flex-col sm:flex-row gap-3 mt-10">
+            <Link to="/testimonials" className="flex-1">
+              <Button variant="outline" className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-white">
                 {t('home.testimonials.viewAll', 'Voir tous les témoignages')}
-                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link to="/testimonials?action=submit">
-              <Button size="lg" className="bg-accent hover:bg-accent/90 text-white">
+            <Link to="/testimonials?action=submit" className="flex-1">
+              <Button className="w-full bg-accent hover:bg-accent/90 text-white">
                 {t('home.testimonials.submit', 'Laisser un témoignage')}
               </Button>
             </Link>
