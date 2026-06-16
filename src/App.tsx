@@ -22,6 +22,9 @@ const PartnershipRequest = lazy(() => import("./pages/PartnershipRequest"));
 const News = lazy(() => import("./pages/News"));
 const NewsArticle = lazy(() => import("./pages/NewsArticle"));
 const TestimonialsPage = lazy(() => import("./pages/TestimonialsPage"));
+const Solutions = lazy(() => import("./pages/Solutions"));
+const OfferingDetail = lazy(() => import("./pages/OfferingDetail"));
+const Partenariats = lazy(() => import("./pages/Partenariats"));
 
 // Lazy-loaded admin pages — vitrine: minimal & focused
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
@@ -77,6 +80,14 @@ const AppContent = () => {
         <Route path="/actualites/:slug" element={<NewsArticle />} />
         <Route path="/news" element={<News />} />
         <Route path="/news/:slug" element={<NewsArticle />} />
+
+        {/* Solutions / Services / Partenariats */}
+        <Route path="/solutions" element={<Solutions />} />
+        <Route path="/services" element={<Solutions />} />
+        <Route path="/solutions/:slug" element={<OfferingDetail type="solution" />} />
+        <Route path="/services/:slug" element={<OfferingDetail type="service" />} />
+        <Route path="/partenariats" element={<Partenariats />} />
+        <Route path="/partnerships" element={<Partenariats />} />
 
         {/* English aliases */}
         <Route path="/home" element={<HomePage />} />

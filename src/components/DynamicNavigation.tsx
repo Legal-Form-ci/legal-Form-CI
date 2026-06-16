@@ -41,8 +41,10 @@ const menuConfig: MenuItem[] = [
   {
     label: { fr: "Nos Offres", en: "Offers", ar: "عروضنا", es: "Ofertas", de: "Angebote", zh: "方案" },
     children: [
+      { label: { fr: "Solutions", en: "Solutions", ar: "حلول", es: "Soluciones", de: "Lösungen", zh: "解决方案" }, action: "/solutions", isRoute: true },
+      { label: { fr: "Services", en: "Services", ar: "خدمات", es: "Servicios", de: "Dienste", zh: "服务" }, action: "/services", isRoute: true },
       { label: { fr: "Comment ça marche", en: "How It Works", ar: "كيف يعمل", es: "Cómo funciona", de: "So funktioniert's", zh: "运作方式" }, action: "approche" },
-      { label: { fr: "Partenariat", en: "Partnership", ar: "شراكة", es: "Asociación", de: "Partnerschaft", zh: "合作" }, action: "partenariat" },
+      { label: { fr: "Partenariats", en: "Partnerships", ar: "شراكات", es: "Asociaciones", de: "Partnerschaften", zh: "合作" }, action: "/partenariats", isRoute: true },
     ],
   },
   {
