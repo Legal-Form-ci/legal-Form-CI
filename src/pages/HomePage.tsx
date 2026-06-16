@@ -11,6 +11,7 @@ import Impact from "@/components/Impact";
 import Founder from "@/components/Founder";
 import Team from "@/components/Team";
 import Partnership from "@/components/Partnership";
+import SolutionsSummary from "@/components/SolutionsSummary";
 import Testimonials from "@/components/Testimonials";
 import NewsSection from "@/components/NewsSection";
 import Contact from "@/components/Contact";
@@ -114,6 +115,7 @@ const HomePage = () => {
       <About />
       <Ambitions />
       <Approach />
+      <SolutionsSummary />
       <Impact />
       <Founder />
       <Team />
